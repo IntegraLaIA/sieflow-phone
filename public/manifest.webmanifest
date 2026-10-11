@@ -1,0 +1,11 @@
+{
+  "name": "SieFlow Phone",
+  "short_name": "SieFlow",
+  "description": "WhatsApp calls and chats for your team",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#12826C",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

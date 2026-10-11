@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#12826C" />
+    <title>SieFlow Phone</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="/style.css" />
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <button class="icon-btn theme-float" type="button" data-theme-toggle data-i18n-title="themeToggle">
+      <span data-icon="moon"></span>
+    </button>
+
+    <!-- Sign in -->
+    <main id="login-view" class="login" hidden>
+      <form id="login-form" class="login-card">
+        <span class="logo-mark large"><span data-icon="phone" data-size="24"></span></span>
+        <h1 data-i18n="signInTitle">Sign in</h1>
+        <p class="muted" data-i18n="signInSubtitle"></p>
+        <label><span data-i18n="username">Username</span><input name="username" autocomplete="username" required /></label>
+        <label><span data-i18n="password">Password</span><input name="password" type="password" autocomplete="current-password" required /></label>
+        <p id="login-error" class="form-error" role="alert" hidden></p>
+        <button class="btn primary block" type="submit" data-i18n="signIn">Sign in</button>
+        <p id="demo-hint" class="hint" hidden></p>
+      </form>
+    </main>
+
+    <!-- Operator signed in before the setup is finished -->
+    <main id="waiting-view" class="login" hidden>
+      <div class="login-card">
+        <span class="logo-mark large"><span data-icon="clock" data-size="24"></span></span>
+        <h1 data-i18n="waitingTitle"></h1>
+        <p class="muted" data-i18n="waitingText"></p>
+        <button id="waiting-logout" class="btn" type="button" data-i18n="signOut"></button>
+      </div>
+    </main>
+
+    <!-- Setup wizard -->
+    <div id="wizard-view" class="wizard" hidden>
+      <aside class="wizard-aside">
+        <div class="brand">
+          <span class="logo-mark"><span data-icon="phone" data-size="17"></span></span>
+          <div>
+            <div class="brand-name">SieFlow Phone</div>
+            <div class="brand-sub" data-i18n="wizardTitle"></div>
+          </div>
+        </div>
+        <p class="wizard-sub" data-i18n="wizardSubtitle"></p>
+        <div class="progress"><span id="wizard-progress-bar"></span></div>
+        <div id="wizard-progress-label" class="progress-label"></div>
+        <ol id="wizard-steps" class="wizard-steps"></ol>
+        <p class="wizard-foot"><span data-icon="info" data-size="14"></span><span data-i18n="wizardFooter"></span></p>
+      </aside>
+      <main id="wizard-main" class="wizard-main"></main>
+    </div>
+
+    <!-- Workspace -->
+    <div id="app-view" hidden>
+      <header class="topbar">
+        <div class="brand">
+          <span class="logo-mark"><span data-icon="phone" data-size="17"></span></span>
+          <div>
+            <div class="brand-name">SieFlow Phone</div>
+            <div id="business-number" class="brand-sub"></div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <span id="link-status" class="pill"><span class="dot"></span><span id="link-label"></span></span>
+          <button id="sound-btn" class="btn small" type="button" hidden>
+            <span data-icon="bell"></span><span class="btn-label" data-i18n="ringtoneOn"></span>
+          </button>
+          <button id="phone-toggle" class="icon-btn phone-toggle" type="button" data-i18n-title="togglePhone">
+            <span data-icon="phone"></span><span class="ping" hidden></span>
+          </button>
+          <button class="icon-btn" type="button" data-theme-toggle data-i18n-title="themeToggle">
+            <span data-icon="moon"></span>
+          </button>
+          <button id="settings-btn" class="icon-btn" type="button" data-i18n-title="settings">
+            <span data-icon="settings"></span>
+          </button>
+          <button id="admin-btn" class="icon-btn" type="button" data-i18n-title="adminSettings" hidden>
+            <span data-icon="sliders"></span>
+          </button>
+          <span id="me" class="user-chip"></span>
+          <button id="logout-btn" class="icon-btn" type="button" data-i18n-title="signOut">
+            <span data-icon="logout"></span>
+          </button>
+        </div>
+      </header>
+
+      <p id="demo-banner" class="banner" hidden>
+        <span data-i18n="demoBanner"></span>
+        <a href="/simulator" target="_blank" rel="noopener" data-i18n="demoBannerLink"></a>
+      </p>
+
+      <main id="workspace" class="workspace">
+        <aside class="inbox-col">
+          <div class="inbox-head">
+            <div class="section-head">
+              <span class="accent-icon" data-icon="msg"></span>
+              <span class="section-title" data-i18n="conversations"></span>
+              <span class="grow"></span>
+              <button id="new-conversation-btn" class="icon-btn small" type="button" data-i18n-title="newConversation">
+                <span data-icon="plus"></span>
+              </button>
+            </div>
+            <label class="search">
+              <span data-icon="search" data-size="15"></span>
+              <input id="conversation-search" type="search" data-i18n-placeholder="search" data-i18n-aria="search" />
+            </label>
+            <div class="tabs" role="tablist">
+              <button type="button" data-filter="mine"><span data-i18n="filterMine"></span><span class="count"></span></button>
+              <button type="button" data-filter="unassigned"><span data-i18n="filterUnassigned"></span><span class="count"></span></button>
+              <button type="button" data-filter="all"><span data-i18n="filterAll"></span><span class="count"></span></button>
+            </div>
+            <div class="segmented">
+              <button type="button" data-status="open" data-i18n="statusOpen"></button>
+              <button type="button" data-status="resolved" data-i18n="statusResolved"></button>
+            </div>
+          </div>
+          <ul id="conversation-list" class="conversation-list"></ul>
+          <p id="conversation-empty" class="empty" data-i18n="noConversations"></p>
+        </aside>
+
+        <section class="thread-col">
+          <div id="thread-empty" class="thread-empty">
+            <span class="logo-mark large soft"><span data-icon="msg" data-size="24"></span></span>
+            <h2 data-i18n="pickConversation"></h2>
+            <p class="muted" data-i18n="pickConversationText"></p>
+          </div>
+          <div id="thread" class="thread" hidden>
+            <header id="thread-head" class="thread-head"></header>
+            <div id="thread-body" class="thread-body"></div>
+            <footer id="composer" class="composer"></footer>
+          </div>
+        </section>
+
+        <aside id="phone-col" class="phone-col">
+          <div id="phone-floating-note" class="floating-note" hidden>
+            <span class="logo-mark soft"><span data-icon="pip" data-size="18"></span></span>
+            <p data-i18n="poppedOut"></p>
+            <button class="btn small" type="button" data-i18n="popIn"></button>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <!-- Dialogs -->
+    <dialog id="settings">
+      <form method="dialog" class="dialog-form">
+        <h2 data-i18n="settings"></h2>
+        <label><span data-i18n="microphone"></span><select id="mic-select"></select></label>
+        <label id="speaker-field"><span data-i18n="speaker"></span><select id="speaker-select"></select></label>
+        <label>
+          <span data-i18n="language"></span>
+          <select id="lang-select">
+            <option value="" data-i18n="langAuto"></option>
+            <option value="es">Español</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+        <button id="notify-btn" class="btn" type="button">
+          <span data-icon="bell"></span><span data-i18n="notifications"></span>
+        </button>
+        <div class="dialog-actions"><button class="btn primary" value="close" data-i18n="done"></button></div>
+      </form>
+    </dialog>
+
+    <dialog id="new-conversation-dialog">
+      <form id="new-conversation-form" class="dialog-form">
+        <h2 data-i18n="newConversation"></h2>
+        <p class="muted" data-i18n="newConversationText"></p>
+        <input type="tel" inputmode="tel" required data-i18n-placeholder="dialPlaceholder" />
+        <div class="dialog-actions">
+          <button type="button" class="btn js-dialog-close" data-i18n="cancel"></button>
+          <button class="btn primary" type="submit" data-i18n="open"></button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="template-dialog" class="wide">
+      <form method="dialog" class="dialog-form">
+        <h2 class="js-template-title"></h2>
+        <p class="muted js-template-note"></p>
+        <div class="choices js-template-list"></div>
+        <div class="fields js-template-fields"></div>
+        <div class="template-preview js-template-preview" hidden></div>
+        <div class="dialog-actions">
+          <button type="button" class="btn js-dialog-close" data-i18n="cancel"></button>
+          <button class="btn primary js-template-send" type="button" data-i18n="send"></button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="permission-dialog">
+      <form method="dialog" class="dialog-form">
+        <h2 data-i18n="requestPermissionTitle"></h2>
+        <p class="muted" data-i18n="requestPermissionText"></p>
+        <textarea rows="3" maxlength="1024"></textarea>
+        <div class="dialog-actions">
+          <button type="button" class="btn js-dialog-close" data-i18n="cancel"></button>
+          <button class="btn primary js-permission-send" type="button" data-i18n="send"></button>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="toasts" class="toasts" aria-live="polite"></div>
+    <audio id="remote-audio" autoplay></audio>
+  </body>
+</html>

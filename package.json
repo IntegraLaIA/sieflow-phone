@@ -1,0 +1,29 @@
+{
+  "name": "sieflow-phone",
+  "version": "0.1.0",
+  "description": "Self-hosted WhatsApp calls and chat for teams: browser softphone, shared inbox and guided setup. No SIP server, no media server, zero dependencies.",
+  "license": "MIT",
+  "type": "module",
+  "main": "src/server.js",
+  "bin": {
+    "sieflow-phone": "src/cli.js"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning src/server.js",
+    "demo": "node --disable-warning=ExperimentalWarning src/server.js --demo",
+    "test": "node --disable-warning=ExperimentalWarning --test \"test/*.test.js\"",
+    "hash-password": "node src/cli.js hash-password"
+  },
+  "keywords": [
+    "whatsapp",
+    "calling",
+    "webrtc",
+    "softphone",
+    "inbox",
+    "self-hosted",
+    "voip"
+  ]
+}

@@ -1,0 +1,30 @@
+# Notes for AI coding agents
+
+These notes are for agents changing the code. To install SieFlow Phone on a server, follow [INSTALL-WITH-AI.md](INSTALL-WITH-AI.md) instead.
+
+## Map
+
+- `src/server.js` entry point; `src/app.js` HTTP routes, sessions, webhook and call API.
+- `src/inbox.js` conversations, messages, templates, media proxy. `src/setup.js` guided setup and team API.
+- `src/db.js` SQLite (`node:sqlite`) with numbered migrations in `MIGRATIONS`: append, never edit an existing one.
+- `src/settings.js` settings and operators (environment variables override and lock values).
+- `src/graph.js` WhatsApp Cloud API client. `src/webhook.js` signature check and event parsing.
+- `src/calls.js` live call state (in memory). `src/demo.js` mock Graph API and simulator, only with `DEMO_MODE`.
+- `public/` browser app: `app.js` bootstrap, `phone.js` WebRTC phone, `inbox.js`, `wizard.js`, `ui.js` (DOM builder, icons, theme), `i18n.js` (English and Spanish).
+
+## Commands
+
+```bash
+npm test          # all tests, ~3 s
+npm run demo      # demo on :8080 (demo / demo1234), simulator at /simulator
+```
+
+## Rules
+
+- Zero npm dependencies; Node 22.13+.
+- Call audio stays browser <-> WhatsApp (WebRTC). The server only relays signaling.
+- WhatsApp rules the code depends on: send the same SDP in `pre_accept` and `accept`; media only after `accept` returns 200; free-form messages only within 24 hours of the customer's last message, templates otherwise; outgoing calls need the user's call permission.
+- Build DOM with `h()` and `textContent`; never put untrusted data in `innerHTML`.
+- Add every UI string to both languages in `public/i18n.js`.
+- Keep the page CSP intact: no inline scripts or styles, no new third-party origins.
+- Test server changes through HTTP against the demo mock in `test/server.test.js`.

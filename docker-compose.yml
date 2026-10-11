@@ -1,0 +1,94 @@
+# SieFlow Phone: self-hosted WhatsApp calls and chat for teams.
+#
+#   docker compose up -d                    SieFlow Phone on 127.0.0.1:8080, behind your own reverse proxy
+#   docker compose --profile https up -d    plus Caddy with automatic HTTPS for $DOMAIN
+#   docker compose --profile turn up -d     plus coturn, for operators behind strict firewalls
+#
+# Then open the site: the guided setup asks for the rest. The setup code is in
+# `docker compose logs sieflow-phone`. Optional settings live in .env (see .env.example).
+# Pin a release with SIEFLOW_PHONE_VERSION=0.1.0 in .env.
+
+name: sieflow-phone
+
+services:
+  sieflow-phone:
+    image: ghcr.io/integralaia/sieflow-phone:${SIEFLOW_PHONE_VERSION:-latest}
+    # From a clone of the repository, `docker compose build` builds this image locally.
+    build: .
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATA_DIR: /data
+      TRUST_PROXY: "true"
+    ports:
+      - "127.0.0.1:${HTTP_PORT:-8080}:8080"
+    volumes:
+      - sieflow-phone-data:/data
+    # Least privilege: read-only filesystem except the data volume, no capabilities.
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    logging: &logging
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  caddy:
+    image: caddy:2.10-alpine
+    profiles: [https]
+    restart: unless-stopped
+    depends_on: [sieflow-phone]
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    logging: *logging
+
+  # Relays audio only for browsers that cannot reach WhatsApp directly.
+  # Host networking avoids publishing thousands of UDP ports through Docker.
+  coturn:
+    image: coturn/coturn:4.6
+    profiles: [turn]
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      TURN_SECRET: ${TURN_SECRET:-}
+      TURN_REALM: ${DOMAIN:-sieflow-phone}
+    logging: *logging
+    # Refuses to start without TURN_SECRET: a relay with a known secret is an open relay.
+    # UDP relay only, per-user and total quotas, and never into private or local networks.
+    entrypoint: ["sh", "-c"]
+    command:
+      - >-
+        [ -n "$$TURN_SECRET" ] || { echo "Set TURN_SECRET in .env"; exit 1; };
+        exec turnserver -n --log-file=stdout --listening-port=3478 --fingerprint
+        --use-auth-secret --static-auth-secret="$$TURN_SECRET" --realm="$$TURN_REALM"
+        --min-port=49160 --max-port=49200 --no-cli --no-tls --no-dtls --no-multicast-peers
+        --no-tcp-relay --user-quota=10 --total-quota=200 --max-bps=64000
+        --denied-peer-ip=0.0.0.0-0.255.255.255
+        --denied-peer-ip=10.0.0.0-10.255.255.255
+        --denied-peer-ip=100.64.0.0-100.127.255.255
+        --denied-peer-ip=127.0.0.0-127.255.255.255
+        --denied-peer-ip=169.254.0.0-169.254.255.255
+        --denied-peer-ip=172.16.0.0-172.31.255.255
+        --denied-peer-ip=192.168.0.0-192.168.255.255
+        --denied-peer-ip=::1
+        --denied-peer-ip=fc00::-fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff
+        --denied-peer-ip=fe80::-febf:ffff:ffff:ffff:ffff:ffff:ffff:ffff
+
+volumes:
+  sieflow-phone-data:
+  caddy-data:
+  caddy-config:

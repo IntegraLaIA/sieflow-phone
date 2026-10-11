@@ -1,0 +1,3 @@
+{$DOMAIN} {
+	reverse_proxy sieflow-phone:8080
+}

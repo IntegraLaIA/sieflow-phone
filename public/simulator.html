@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Simulator · SieFlow Phone</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="/style.css" />
+    <script type="module" src="/simulator.js"></script>
+  </head>
+  <body>
+    <button class="icon-btn theme-float" type="button" data-theme-toggle data-i18n-title="themeToggle">
+      <span data-icon="moon"></span>
+    </button>
+
+    <main class="sim">
+      <header class="sim-head">
+        <span class="logo-mark large"><span data-icon="phone" data-size="24"></span></span>
+        <h1 data-i18n="simTitle">WhatsApp user simulator</h1>
+        <p data-i18n="simIntro"></p>
+      </header>
+
+      <section class="card">
+        <label><span data-i18n="simName">Your name</span><input id="sim-name" value="Demo User" /></label>
+        <label><span data-i18n="simNumber">Your WhatsApp number</span><input id="sim-number" value="15550100101" inputmode="tel" /></label>
+        <label>
+          <span data-i18n="simSource">Audio you send</span>
+          <select id="sim-source">
+            <option value="tone" data-i18n="simTone">Test tone</option>
+            <option value="mic" data-i18n="simMic">Microphone</option>
+          </select>
+        </label>
+        <p class="small-print" data-i18n="simNoPermission"></p>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <span class="accent-icon" data-icon="msg"></span>
+          <span class="section-title" data-i18n="simChat"></span>
+        </div>
+        <div id="sim-chat" class="sim-chat"></div>
+        <form id="sim-send" class="sim-send" autocomplete="off">
+          <input id="sim-text" data-i18n-placeholder="writeMessage" />
+          <button class="btn primary" type="submit" data-i18n-title="send"><span data-icon="send"></span></button>
+        </form>
+      </section>
+
+      <section class="card">
+        <div id="sim-state" class="sim-state"></div>
+        <p id="sim-detail" class="sim-detail"></p>
+        <div class="sim-row">
+          <button id="sim-call" class="btn primary" type="button"><span data-icon="phone"></span><span data-i18n="simCall">Call the business</span></button>
+          <button id="sim-answer" class="btn primary" type="button" hidden><span data-icon="phone"></span><span data-i18n="answer">Answer</span></button>
+          <button id="sim-decline" class="btn" type="button" hidden><span data-icon="hangup"></span><span data-i18n="decline">Decline</span></button>
+          <button id="sim-hangup" class="btn" type="button" hidden><span data-icon="hangup"></span><span data-i18n="hangUp">Hang up</span></button>
+        </div>
+        <div class="meter" title="Audio"><span id="sim-meter"></span></div>
+        <p id="sim-stats" class="small-print"></p>
+      </section>
+    </main>
+    <audio id="sim-audio" autoplay></audio>
+  </body>
+</html>
