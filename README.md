@@ -1,142 +1,142 @@
 # SieFlow Phone
 
-**Self-hosted WhatsApp calls and chat for your team.** Answer and place WhatsApp voice calls from the browser and reply to WhatsApp messages from a shared inbox. No Asterisk, no SIP trunk, no media server: one small container with zero dependencies.
+**Llamadas y chat de WhatsApp para tu equipo, en tu propio servidor.** Contesta y haz llamadas de voz de WhatsApp desde el navegador y responde los mensajes desde una bandeja compartida. Sin Asterisk, sin troncal SIP y sin servidor de medios: un contenedor pequeño y sin dependencias.
 
 [![CI](https://github.com/IntegraLaIA/sieflow-phone/actions/workflows/ci.yml/badge.svg)](https://github.com/IntegraLaIA/sieflow-phone/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/IntegraLaIA/sieflow-phone)](https://github.com/IntegraLaIA/sieflow-phone/releases)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Licencia: MIT](https://img.shields.io/badge/licencia-MIT-green)](LICENSE)
 
-Part of [SieFlow](https://sieflow.ai), by INTEGRALAIA. · [Español](README.es.md)
+Parte de [SieFlow](https://sieflow.ai), de INTEGRALAIA (Bogotá, Colombia). · **Español** · [English](README.en.md)
 
-![SieFlow Phone: shared inbox, conversation and a WhatsApp call in progress](docs/images/workspace.png)
+![SieFlow Phone: bandeja compartida, conversación y una llamada de WhatsApp en curso](docs/images/workspace.png)
 
-## Features
+## Qué hace
 
-- **Phone in the browser.** Incoming WhatsApp calls ring on every signed-in operator and the first one to answer takes it. Outgoing calls with the call permission WhatsApp requires. Mute, keypad tones, microphone and speaker selection.
-- **Floating phone.** Pop the phone out of the browser into an always-on-top window, like a mini player (Chrome and Edge).
-- **Shared inbox.** Messages and calls in one thread per customer: text, photos, voice notes, documents, locations. Replies inside the 24-hour window, approved templates outside it, delivery ticks.
-- **Call permission from the chat.** An interactive request inside the 24-hour window, a template with the permission button outside it, and the answer shows up in the thread.
-- **Multi-agent, without the complexity.** Mine / Unassigned / All, the first reply takes the conversation, assign to a teammate, resolve and reopen.
-- **Guided setup.** An empty instance asks for everything in the browser and checks each value live against Meta, down to configuring the webhook for you.
-- English and Spanish, light and dark, installable as a desktop app. A demo mode simulates WhatsApp so you can try everything without a Meta account.
+- **Teléfono en el navegador.** Las llamadas entrantes de WhatsApp timbran en todos los operadores conectados y la toma el primero que conteste. Llamadas salientes con el permiso que exige WhatsApp. Silenciar, tonos del teclado, micrófono y parlante.
+- **Teléfono flotante.** Saca el teléfono del navegador a una ventana siempre encima, como un minirreproductor (Chrome y Edge).
+- **Bandeja compartida.** Mensajes y llamadas en un solo hilo por cliente: texto, fotos, notas de voz, documentos, ubicaciones. Respuestas dentro de la ventana de 24 horas, plantillas aprobadas fuera de ella, estados de entrega.
+- **Permiso de llamada desde el chat.** Solicitud interactiva dentro de la ventana de 24 horas, plantilla con botón de permiso fuera de ella, y la respuesta aparece en el hilo.
+- **Multiagente sin complicaciones.** Mías / Sin asignar / Todas, la primera respuesta toma la conversación, asignar a un compañero, resolver y reabrir.
+- **Configuración guiada.** Una instancia vacía pide todo en el navegador y verifica cada dato en vivo contra Meta, hasta configurar el webhook por ti.
+- Español e inglés, tema claro y oscuro, instalable como app de escritorio. Un modo demo simula WhatsApp para probar todo sin cuenta de Meta.
 
-## Try it in one minute
+## Pruébalo en un minuto
 
 ```bash
 docker run --rm -p 8080:8080 -e DEMO_MODE=true ghcr.io/integralaia/sieflow-phone
 ```
 
-Open http://localhost:8080 (user `demo`, password `demo1234`) and, in another tab, http://localhost:8080/simulator. The simulator plays the WhatsApp user: write to the business, call it, accept the call permission request. It runs the real, signed webhook flow against a mock of the WhatsApp API, and the audio is real WebRTC.
+Abre http://localhost:8080 (usuario `demo`, contraseña `demo1234`) y, en otra pestaña, http://localhost:8080/simulator. El simulador hace de usuario de WhatsApp: escríbele al negocio, llámalo, acepta la solicitud de permiso de llamada. Corre el flujo real del webhook firmado contra una simulación de la API de WhatsApp, y el audio es WebRTC de verdad.
 
-## Install on your server
+## Instálalo en tu servidor
 
-You need Docker with Compose, a domain pointing to the server and ports 80/443 free.
+Necesitas Docker con Compose, un dominio apuntando al servidor y los puertos 80/443 libres.
 
 ```bash
 mkdir sieflow-phone && cd sieflow-phone
 curl -fsSLO https://raw.githubusercontent.com/IntegraLaIA/sieflow-phone/main/docker-compose.yml
 curl -fsSLO https://raw.githubusercontent.com/IntegraLaIA/sieflow-phone/main/Caddyfile
-echo "DOMAIN=phone.example.com" > .env
+echo "DOMAIN=telefono.tuempresa.com" > .env
 docker compose --profile https up -d
 docker compose logs sieflow-phone | grep "Setup code"
 ```
 
-Open `https://phone.example.com`, enter the setup code and follow the guided setup. Already running nginx, Traefik or another proxy? Start without the profile (`docker compose up -d`) and point the proxy at `127.0.0.1:8080`.
+Abre `https://telefono.tuempresa.com`, escribe el código de configuración y sigue la configuración guiada. ¿Ya tienes nginx, Traefik u otro proxy? Arranca sin el perfil (`docker compose up -d`) y apunta el proxy a `127.0.0.1:8080`.
 
-### Or let your AI assistant do it
+### O deja que tu asistente de IA lo instale
 
-Give Claude Code, Codex, Cursor or any agent with shell access this prompt:
+Dale este mensaje a Claude Code, Codex, Cursor o cualquier agente con acceso a la terminal:
 
-> Install SieFlow Phone on this server following https://raw.githubusercontent.com/IntegraLaIA/sieflow-phone/main/INSTALL-WITH-AI.md
+> Instala SieFlow Phone en este servidor siguiendo https://raw.githubusercontent.com/IntegraLaIA/sieflow-phone/main/INSTALL-WITH-AI.md
 
-[INSTALL-WITH-AI.md](INSTALL-WITH-AI.md) walks the agent through checks, installation, verification, upgrades and backups, with rules on what to ask before doing.
+[INSTALL-WITH-AI.md](INSTALL-WITH-AI.md) guía al agente por las verificaciones, la instalación, las pruebas, las actualizaciones y los respaldos, con reglas sobre qué preguntar antes de actuar.
 
-## Guided setup
+## Configuración guiada
 
-![Guided setup checking the Meta app and token live](docs/images/setup.png)
+![Configuración guiada verificando la app de Meta y el token en vivo](docs/images/setup.png)
 
-| Step | What it does |
+| Paso | Qué hace |
 | --- | --- |
-| Your account | Creates the first administrator with the one-time code from the server logs, so nobody else can claim the instance. |
-| Meta app | Checks App ID, App Secret and token live: valid, system user, never expires, permissions, same app. Then lists your WhatsApp accounts and numbers to pick one. |
-| Webhook | Shows the callback URL and a generated verify token, and can configure the app webhook (`calls`, `messages`) and subscribe your account for you. Live checks show when Meta verifies the URL and when events arrive. |
-| Calling | Checks Cloud API, quality, messaging limit, SIP off and restrictions; turns calling and the call button on; sets the call permission request text. |
-| Team | Adds operators and administrators. |
+| Tu cuenta | Crea el primer administrador con el código de un solo uso de los logs, así nadie más reclama la instancia. |
+| App de Meta | Verifica en vivo App ID, App Secret y token: válido, de usuario del sistema, que no venza, permisos y misma app. Luego lista tus cuentas y números de WhatsApp para elegir uno. |
+| Webhook | Muestra la URL de devolución y un token de verificación generado, y puede configurar el webhook de la app (`calls`, `messages`) y suscribir tu cuenta por ti. Las revisiones en vivo muestran cuándo Meta verifica la URL y cuándo llegan eventos. |
+| Llamadas | Revisa Cloud API, calidad, límite de mensajería, SIP apagado y restricciones; activa las llamadas y el botón de llamada; define el texto de la solicitud de permiso. |
+| Equipo | Agrega operadores y administradores. |
 
-What Meta requires: a number on the WhatsApp **Cloud API** (calling does not work on numbers shared with the WhatsApp Business app), a messaging limit of 2,000 or more for calling, and a Meta app with a permanent system user token (`whatsapp_business_messaging`, `whatsapp_business_management`).
+Lo que pide Meta: un número en la **Cloud API** de WhatsApp (las llamadas no funcionan en números compartidos con la app de WhatsApp Business), un límite de mensajería de 2.000 o más para llamar, y una app de Meta con un token permanente de usuario del sistema (`whatsapp_business_messaging`, `whatsapp_business_management`).
 
-## How it works
+## Cómo funciona
 
-The WhatsApp Cloud API negotiates calls with standard WebRTC SDP and terminates the audio on Meta's media servers. A browser is a WebRTC endpoint, so it can talk to WhatsApp directly. SieFlow Phone relays the signaling and keeps the inbox:
+La Cloud API de WhatsApp negocia las llamadas con SDP de WebRTC estándar y termina el audio en los servidores de medios de Meta. Un navegador es un extremo WebRTC, así que puede hablar directo con WhatsApp. SieFlow Phone transporta la señalización y guarda la bandeja:
 
 ```
- Operator's browser                     SieFlow Phone (Node)             WhatsApp Cloud API
- ------------------                     --------------------             ------------------
- RTCPeerConnection   <-- SSE events --  webhook /webhook  <-- calls, messages, statuses
- inbox UI            -- JSON POSTs -->  Graph API client  -- pre_accept/accept, messages -->
+ Navegador del operador                 SieFlow Phone (Node)             Cloud API de WhatsApp
+ ----------------------                 --------------------             ---------------------
+ RTCPeerConnection   <-- eventos SSE --  webhook /webhook  <-- llamadas, mensajes, estados
+ bandeja             -- POST JSON ---->  cliente Graph API -- pre_accept/accept, mensajes -->
         |                                                                         |
         +===================== audio: WebRTC (Opus, DTLS-SRTP) ==================+
-                         straight to Meta, never through SieFlow Phone
+                        directo a Meta, nunca pasa por SieFlow Phone
 ```
 
-Incoming call: Meta sends a `connect` webhook with an SDP offer; the operator who answers creates the SDP answer in the browser; SieFlow Phone sends `pre_accept`, waits for the media connection, then `accept` with the same SDP. The microphone goes on the line only after `accept` returns 200, as Meta asks. Outgoing calls attach the microphone when the person picks up.
+Llamada entrante: Meta envía un webhook `connect` con una oferta SDP; el operador que contesta crea la respuesta SDP en el navegador; SieFlow Phone envía `pre_accept`, espera la conexión de medios y luego `accept` con el mismo SDP. El micrófono entra a la línea solo cuando `accept` responde 200, como pide Meta. En las llamadas salientes el micrófono entra cuando la persona contesta.
 
-<img src="docs/images/mobile-dark.png" alt="SieFlow Phone on a phone, dark theme" width="300" align="right">
+<img src="docs/images/mobile-dark.png" alt="SieFlow Phone en un celular, tema oscuro" width="300" align="right">
 
-## Settings
+## Variables
 
-Nothing is required in the environment: the guided setup stores everything. Any of these, when set, wins over the setup and shows there as read-only.
+No hace falta ninguna: la configuración guiada guarda todo. Si defines alguna, manda sobre la configuración guiada y allí aparece como de solo lectura. Cada una viene comentada en [.env.example](.env.example).
 
-| Variable | Description |
+| Variable | Para qué sirve |
 | --- | --- |
-| `WA_APP_ID`, `WA_APP_SECRET` | Meta app; the secret verifies webhook signatures |
-| `WA_ACCESS_TOKEN` | Permanent Graph API token |
-| `WA_WABA_ID`, `WA_PHONE_NUMBER_ID` | WhatsApp Business Account and phone number |
-| `WA_VERIFY_TOKEN` | Webhook verification token (generated if missing) |
-| `WA_DISPLAY_NUMBER`, `WA_GRAPH_VERSION` | Number in the header; Graph API version (default `v24.0`) |
-| `PERMISSION_REQUEST_TEXT` | Text of the call permission request |
-| `PUBLIC_URL` | Public address, used to suggest the webhook URL |
-| `SETUP_CODE` | Fixed setup code (8+ letters or digits) instead of a random one |
-| `USERS` / `USERS_FILE` | Administrators as `name:scrypt-hash` (`node src/cli.js hash-password`) |
-| `SESSION_SECRET`, `SESSION_TTL_HOURS` | Session key (otherwise generated and stored) and length (default 12 h) |
-| `RETENTION_DAYS` | Delete messages and call records older than this many days |
-| `ICE_SERVERS`, `TURN_URLS`, `TURN_SECRET` | Extra STUN/TURN; with `TURN_SECRET`, short-lived per-operator TURN credentials |
-| `WEBHOOK_FORWARD_URL` | Forward every webhook, signature included, to another backend |
-| `SIEFLOW_PHONE_VERSION` | Image tag used by the compose file (default `latest`) |
-| `DEMO_MODE` | Mock WhatsApp API and simulator; data in memory only. Never on a public server |
+| `WA_APP_ID`, `WA_APP_SECRET` | App de Meta; el secreto verifica la firma de los webhooks |
+| `WA_ACCESS_TOKEN` | Token permanente de la Graph API |
+| `WA_WABA_ID`, `WA_PHONE_NUMBER_ID` | Cuenta de WhatsApp Business y número de teléfono |
+| `WA_VERIFY_TOKEN` | Token de verificación del webhook (se genera si falta) |
+| `WA_DISPLAY_NUMBER`, `WA_GRAPH_VERSION` | Número que se muestra en la cabecera; versión de la Graph API (por defecto `v24.0`) |
+| `PERMISSION_REQUEST_TEXT` | Texto de la solicitud de permiso de llamada |
+| `PUBLIC_URL` | Dirección pública, para sugerir la URL del webhook |
+| `SETUP_CODE` | Código de configuración fijo (8 o más letras o dígitos) en vez de uno aleatorio |
+| `USERS` / `USERS_FILE` | Administradores como `nombre:hash-scrypt` (`node src/cli.js hash-password`) |
+| `SESSION_SECRET`, `SESSION_TTL_HOURS` | Llave de las sesiones (si no, se genera y se guarda) y duración (por defecto 12 h) |
+| `RETENTION_DAYS` | Borra los mensajes y registros de llamadas con más de esos días |
+| `ICE_SERVERS`, `TURN_URLS`, `TURN_SECRET` | STUN/TURN adicionales; con `TURN_SECRET`, credenciales TURN de corta duración por operador |
+| `WEBHOOK_FORWARD_URL` | Reenvía cada webhook, con su firma, a otro backend |
+| `SIEFLOW_PHONE_VERSION` | Etiqueta de la imagen que usa el compose (por defecto `latest`) |
+| `DEMO_MODE` | API de WhatsApp simulada y simulador; datos solo en memoria. Nunca en un servidor público |
 
-**Already receiving WhatsApp messages elsewhere?** Meta allows one webhook URL per app. Point it at SieFlow Phone and set `WEBHOOK_FORWARD_URL` to your existing endpoint: every webhook is forwarded untouched, with Meta's signature.
+**¿Ya recibes los mensajes de WhatsApp en otro sistema?** Meta permite una sola URL de webhook por app. Apúntala a SieFlow Phone y define `WEBHOOK_FORWARD_URL` con tu endpoint actual: cada webhook se reenvía intacto, con la firma de Meta.
 
-**Strict firewalls.** WhatsApp media servers have public addresses, so most networks connect directly. For operators on networks that block UDP, `docker compose --profile turn up -d` adds coturn (set `TURN_SECRET` and `TURN_URLS`; see [INSTALL-WITH-AI.md](INSTALL-WITH-AI.md#optional-turn-for-strict-networks)).
+**Firewalls estrictos.** Los servidores de medios de WhatsApp tienen IP pública, así que la mayoría de redes conecta directo. Para operadores en redes que bloquean UDP, `docker compose --profile turn up -d` agrega coturn (define `TURN_SECRET` y `TURN_URLS`; ver [INSTALL-WITH-AI.md](INSTALL-WITH-AI.md#opcional-turn-para-redes-estrictas)).
 
 <br clear="right">
 
-## Privacy and security
+## Privacidad y seguridad
 
-- **Your data stays on your server**: settings, operators, conversations and call records live in one SQLite file in the data volume. Call audio never reaches the server.
-- **Retention and erasure**: `RETENTION_DAYS` deletes old messages automatically, and administrators can delete a contact with all its messages and calls.
-- **Hardened by default**: signed webhooks only, one-time setup code, scrypt passwords, sessions that end when a password changes, rate-limited sign-in, strict CSP, HSTS, and a container that runs unprivileged on a read-only filesystem.
-- The only third-party request from the browser is the Quicksand font from Google Fonts.
+- **Tus datos se quedan en tu servidor**: ajustes, operadores, conversaciones y registros de llamadas viven en un archivo SQLite dentro del volumen de datos. El audio de las llamadas nunca llega al servidor.
+- **Retención y borrado**: `RETENTION_DAYS` borra solo los mensajes viejos, y un administrador puede eliminar un contacto con todos sus mensajes y llamadas (útil para la Ley 1581 de 2012 y el RGPD).
+- **Seguro por defecto**: solo webhooks firmados, código de configuración de un solo uso, contraseñas scrypt, sesiones que terminan al cambiar la contraseña, límite de intentos, CSP estricta, HSTS y un contenedor sin privilegios con sistema de archivos de solo lectura.
+- La única petición a terceros desde el navegador es la fuente Quicksand de Google Fonts.
 
-Read [SECURITY.md](SECURITY.md) for the details and how to report a vulnerability.
+Detalles y cómo reportar una vulnerabilidad en [SECURITY.md](SECURITY.md).
 
-## Limits
+## Límites
 
-- Audio calls only, one call per operator at a time. Operators reply with text and templates; sending files is not built yet.
-- No call transfer, recording or server-side transcription: the audio never reaches the server, which is what keeps it light.
-- One instance and one WhatsApp number per instance.
+- Solo llamadas de audio, una por operador a la vez. Los operadores responden con texto y plantillas; enviar archivos aún no está.
+- Sin transferencia, grabación ni transcripción en el servidor: el audio nunca llega al servidor, y eso es lo que lo mantiene liviano.
+- Una instancia y un número de WhatsApp por instancia.
 
-## Development
+## Desarrollo
 
 ```bash
-npm run demo      # http://localhost:8080 and /simulator, no Meta account needed
-npm test          # node:test, no dependencies
+npm run demo      # http://localhost:8080 y /simulator, sin cuenta de Meta
+npm test          # node:test, sin dependencias
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). AI coding agents: read [AGENTS.md](AGENTS.md).
+Ver [CONTRIBUTING.md](CONTRIBUTING.md). Los issues y pull requests se reciben en español o en inglés. Agentes de IA que programan: lean [AGENTS.md](AGENTS.md).
 
-## Credits and license
+## Créditos y licencia
 
-Icons from [Lucide](https://lucide.dev) (ISC). Typeface [Quicksand](https://fonts.google.com/specimen/Quicksand) (OFL).
+Íconos de [Lucide](https://lucide.dev) (ISC). Tipografía [Quicksand](https://fonts.google.com/specimen/Quicksand) (OFL).
 
-[MIT](LICENSE) © 2026 INTEGRALAIA SAS. WhatsApp is a trademark of Meta Platforms, Inc. SieFlow Phone is an independent project and is not affiliated with or endorsed by Meta.
+[MIT](LICENSE) © 2026 INTEGRALAIA SAS. WhatsApp es una marca de Meta Platforms, Inc. SieFlow Phone es un proyecto independiente, sin afiliación ni respaldo de Meta.

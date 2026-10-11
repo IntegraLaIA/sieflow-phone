@@ -1,103 +1,106 @@
-# Install SieFlow Phone with an AI agent
+# Instalar SieFlow Phone con un agente de IA
 
-This guide is written for AI agents (Claude Code, Codex, Cursor, Copilot, Gemini CLI...) that a person asks to install SieFlow Phone on a server. People can follow it too: every step is a plain shell command.
+**Español** · [English](INSTALL-WITH-AI.en.md)
 
-**Prompt to give your agent:**
+Esta guía está escrita para agentes de IA (Claude Code, Codex, Cursor, Copilot, Gemini CLI...) a los que una persona les pide instalar SieFlow Phone en un servidor. También la puede seguir una persona: cada paso es un comando de terminal.
 
-> Install SieFlow Phone on this server following https://raw.githubusercontent.com/IntegraLaIA/sieflow-phone/main/INSTALL-WITH-AI.md
+**Mensaje para darle a tu agente:**
 
-The result: SieFlow Phone running in Docker behind HTTPS on your domain, and a one-time setup code. The person then opens the site and finishes the guided setup (Meta app, webhook, calling, team) in the browser.
+> Instala SieFlow Phone en este servidor siguiendo https://raw.githubusercontent.com/IntegraLaIA/sieflow-phone/main/INSTALL-WITH-AI.md
 
-## Rules for the agent
+El resultado: SieFlow Phone corriendo en Docker detrás de HTTPS en tu dominio, y un código de configuración de un solo uso. Después la persona abre el sitio y termina la configuración guiada (app de Meta, webhook, llamadas y equipo) en el navegador.
 
-1. **Ask before** installing software, using `sudo`, opening firewall ports, stopping services that use ports 80/443, or touching an existing installation.
-2. **Never echo secrets** (Meta access token, app secret, TURN secret) in the chat or in command output. Write them only to `.env` and keep it at mode `600`.
-3. **Never set `DEMO_MODE=true`** on a server reachable from the internet.
-4. **Prefer the latest release** and pin it in `.env` (`SIEFLOW_PHONE_VERSION`), so upgrades are deliberate.
-5. If a step fails twice, stop and report the exact command and output instead of improvising.
+## Reglas para el agente
 
-## 1. Gather from the person
+1. **Habla en el idioma de la persona.** Si escribe en español, responde en español.
+2. **Pregunta antes** de instalar software, usar `sudo`, abrir puertos en el firewall, detener servicios que usen los puertos 80/443 o tocar una instalación existente.
+3. **Nunca muestres secretos** (token de acceso de Meta, App Secret, secreto de TURN) en el chat ni en la salida de un comando. Escríbelos solo en `.env` y déjalo en modo `600`.
+4. **Nunca pongas `DEMO_MODE=true`** en un servidor al que se llega desde internet.
+5. **Usa la última versión publicada** y fíjala en `.env` (`SIEFLOW_PHONE_VERSION`), para que las actualizaciones sean deliberadas.
+6. Si un paso falla dos veces, detente y reporta el comando exacto y su salida en vez de improvisar.
 
-| Input | Required | Example |
+## 1. Pídele a la persona
+
+| Dato | Obligatorio | Ejemplo |
 | --- | --- | --- |
-| Domain with a DNS A/AAAA record pointing to this server | yes | `phone.example.com` |
-| HTTPS: the bundled Caddy (recommended) or an existing reverse proxy | yes | bundled Caddy |
-| Install directory | no | `/opt/sieflow-phone` |
-| Operators behind strict firewalls that block UDP (needs TURN) | no | no |
+| Dominio con un registro DNS A/AAAA apuntando a este servidor | sí | `telefono.tuempresa.com` |
+| HTTPS: el Caddy incluido (recomendado) o un proxy inverso que ya exista | sí | Caddy incluido |
+| Carpeta de instalación | no | `/opt/sieflow-phone` |
+| Operadores detrás de firewalls estrictos que bloquean UDP (necesita TURN) | no | no |
 
-Meta credentials are **not** needed now: the person enters them in the guided setup, which checks each value live. If they prefer environment variables, see step 4.
+Las credenciales de Meta **no** hacen falta ahora: la persona las escribe en la configuración guiada, que verifica cada dato en vivo. Si prefiere variables de entorno, ver el paso 4.
 
-## 2. Check the server
+## 2. Revisa el servidor
 
 ```bash
 uname -sm
 docker --version && docker compose version
 ```
 
-- Docker Engine 24+ with the Compose plugin (v2.24+) is required. If it is missing, ask the person and install it from the official guide: https://docs.docker.com/engine/install/
-- Linux on amd64 or arm64 works. 1 vCPU and 1 GB of RAM are plenty.
+- Se necesita Docker Engine 24 o superior con el plugin de Compose (v2.24 o superior). Si falta, pregúntale a la persona e instálalo con la guía oficial: https://docs.docker.com/engine/install/
+- Funciona en Linux con amd64 o arm64. Con 1 vCPU y 1 GB de RAM sobra.
 
-With the bundled Caddy, ports 80 and 443 must be free and reachable from the internet:
+Con el Caddy incluido, los puertos 80 y 443 deben estar libres y abiertos desde internet:
 
 ```bash
 sudo ss -ltnp '( sport = :80 or sport = :443 )'
 ```
 
-Check that the domain points here (both commands should print the same address):
+Comprueba que el dominio apunte aquí (los dos comandos deben mostrar la misma dirección):
 
 ```bash
 curl -fsS https://api.ipify.org; echo
-getent ahosts phone.example.com | awk 'NR==1 {print $1}'
+getent ahosts telefono.tuempresa.com | awk 'NR==1 {print $1}'
 ```
 
-## 3. Download the release files
+## 3. Descarga los archivos de la versión
 
 ```bash
 VERSION="$(curl -fsS https://api.github.com/repos/IntegraLaIA/sieflow-phone/releases/latest | sed -n 's/.*"tag_name": *"v\([^"]*\)".*/\1/p')"
-echo "Installing SieFlow Phone $VERSION"
+echo "Instalando SieFlow Phone $VERSION"
 sudo mkdir -p /opt/sieflow-phone && sudo chown "$USER" /opt/sieflow-phone && cd /opt/sieflow-phone
 curl -fsSLO "https://raw.githubusercontent.com/IntegraLaIA/sieflow-phone/v$VERSION/docker-compose.yml"
 curl -fsSLO "https://raw.githubusercontent.com/IntegraLaIA/sieflow-phone/v$VERSION/Caddyfile"
 ```
 
-## 4. Configure
+## 4. Configura
 
 ```bash
 cat > .env <<EOF
-DOMAIN=phone.example.com
+DOMAIN=telefono.tuempresa.com
 SIEFLOW_PHONE_VERSION=$VERSION
 EOF
 chmod 600 .env
 ```
 
-Optional lines for `.env` (every one of them can also be set later in the browser; values set here show as read-only there):
+Líneas opcionales para `.env` (cada una también se puede definir después en el navegador; las que se definan aquí aparecen allí como de solo lectura):
 
 ```bash
-# Meta app, if the person gave you the values
+# App de Meta, si la persona te dio los valores
 WA_APP_ID=...
 WA_APP_SECRET=...
 WA_ACCESS_TOKEN=...
 WA_WABA_ID=...
 WA_PHONE_NUMBER_ID=...
-# A fixed setup code instead of a random one
+# Un código de configuración fijo en vez de uno aleatorio
 SETUP_CODE=...
 ```
 
-## 5. Start
+## 5. Arranca
 
-With the bundled Caddy (gets a Let's Encrypt certificate automatically):
+Con el Caddy incluido (saca un certificado de Let's Encrypt automáticamente):
 
 ```bash
 docker compose --profile https up -d
 ```
 
-With an existing reverse proxy, start only the app and point the proxy at `http://127.0.0.1:8080`:
+Con un proxy inverso que ya exista, arranca solo la aplicación y apunta el proxy a `http://127.0.0.1:8080`:
 
 ```bash
 docker compose up -d
 ```
 
-The app uses Server-Sent Events, so the proxy must not buffer responses. For nginx:
+La aplicación usa Server-Sent Events, así que el proxy no debe almacenar en búfer las respuestas. Para nginx:
 
 ```nginx
 location / {
@@ -111,55 +114,55 @@ location / {
 }
 ```
 
-## 6. Verify
+## 6. Verifica
 
 ```bash
 docker compose ps
 curl -fsS http://127.0.0.1:8080/healthz; echo
-curl -fsSI "https://phone.example.com/" | head -n 5
+curl -fsSI "https://telefono.tuempresa.com/" | head -n 5
 ```
 
-Expected: the `sieflow-phone` service is `healthy`, `/healthz` answers `{"ok":true,"version":"..."}` and the domain answers `HTTP/2 200` with a `strict-transport-security` header. Caddy may need up to a minute for the first certificate.
+Lo esperado: el servicio `sieflow-phone` aparece `healthy`, `/healthz` responde `{"ok":true,"version":"..."}` y el dominio responde `HTTP/2 200` con la cabecera `strict-transport-security`. Caddy puede tardar hasta un minuto en sacar el primer certificado.
 
-## 7. Hand over to the person
+## 7. Entrégaselo a la persona
 
 ```bash
 docker compose logs sieflow-phone | grep -m1 "Setup code"
 ```
 
-Give the person:
+Entrégale a la persona:
 
-1. The URL `https://phone.example.com`.
-2. The setup code (it is one-time: whoever uses it first becomes the administrator).
-3. What the guided setup will ask for: the Meta App ID and App Secret, a permanent system user token with `whatsapp_business_messaging` and `whatsapp_business_management`, then the webhook (it can configure it in Meta automatically), calling and the team.
+1. La URL `https://telefono.tuempresa.com`.
+2. El código de configuración (es de un solo uso: quien lo use primero queda como administrador).
+3. Lo que le va a pedir la configuración guiada: el App ID y el App Secret de Meta, un token permanente de usuario del sistema con `whatsapp_business_messaging` y `whatsapp_business_management`, y después el webhook (lo puede configurar en Meta automáticamente), las llamadas y el equipo.
 
-Requirements on the Meta side they should know: the number must be on the WhatsApp Cloud API (not shared with the WhatsApp Business app), with a messaging limit of 2,000 or more for calling, and SIP calling turned off.
+Requisitos del lado de Meta que debe conocer: el número tiene que estar en la Cloud API de WhatsApp (no compartido con la app de WhatsApp Business), con un límite de mensajería de 2.000 o más para llamar, y con las llamadas por SIP apagadas.
 
-## Optional: TURN for strict networks
+## Opcional: TURN para redes estrictas
 
-Only if some operators sit behind firewalls that block outbound UDP:
+Solo si algunos operadores están detrás de firewalls que bloquean el UDP de salida:
 
 ```bash
 echo "TURN_SECRET=$(openssl rand -hex 32)" >> .env
-echo "TURN_URLS=turn:phone.example.com:3478?transport=udp,turn:phone.example.com:3478?transport=tcp" >> .env
+echo "TURN_URLS=turn:telefono.tuempresa.com:3478?transport=udp,turn:telefono.tuempresa.com:3478?transport=tcp" >> .env
 docker compose --profile https --profile turn up -d
 ```
 
-Open UDP and TCP 3478 and UDP 49160-49200 in the firewall (ask first).
+Abre en el firewall UDP y TCP 3478 y UDP 49160-49200 (pregunta primero).
 
-## Upgrade
+## Actualizar
 
 ```bash
 cd /opt/sieflow-phone
-sed -i "s/^SIEFLOW_PHONE_VERSION=.*/SIEFLOW_PHONE_VERSION=NEW_VERSION/" .env
+sed -i "s/^SIEFLOW_PHONE_VERSION=.*/SIEFLOW_PHONE_VERSION=NUEVA_VERSION/" .env
 docker compose --profile https pull && docker compose --profile https up -d
 ```
 
-Read the [changelog](CHANGELOG.md) first. Database migrations run on start.
+Lee primero el [registro de cambios](CHANGELOG.md). Las migraciones de la base de datos corren al arrancar.
 
-## Backup and restore
+## Respaldo y restauración
 
-Everything (settings, operators, conversations) is in the `sieflow-phone_sieflow-phone-data` volume:
+Todo (ajustes, operadores, conversaciones) está en el volumen `sieflow-phone_sieflow-phone-data`:
 
 ```bash
 docker compose stop sieflow-phone
@@ -168,21 +171,21 @@ docker run --rm -v sieflow-phone_sieflow-phone-data:/data -v "$PWD":/backup alpi
 docker compose start sieflow-phone
 ```
 
-The archive contains the WhatsApp access token: store it like a secret. Restore by extracting it into an empty volume with the service stopped.
+El archivo contiene el token de acceso de WhatsApp: guárdalo como un secreto. Para restaurar, descomprímelo en un volumen vacío con el servicio detenido.
 
-## Uninstall
+## Desinstalar
 
 ```bash
-docker compose --profile https --profile turn down      # keeps the data volume
-docker volume rm sieflow-phone_sieflow-phone-data       # deletes all data, ask first
+docker compose --profile https --profile turn down      # conserva el volumen de datos
+docker volume rm sieflow-phone_sieflow-phone-data       # borra todos los datos, pregunta primero
 ```
 
-## Troubleshooting
+## Solución de problemas
 
-| Symptom | Check |
+| Síntoma | Qué revisar |
 | --- | --- |
-| No certificate, Caddy logs ACME errors | DNS points to this server; ports 80/443 open; no other service on them. |
-| Page loads but "Reconnecting" never ends | The reverse proxy buffers SSE: disable buffering (see nginx above). |
-| Meta cannot verify the webhook | The URL must be public HTTPS ending in `/webhook`; the verify token must match the one shown in the guided setup. |
-| Calls ring but there is no audio | The operator's network blocks UDP: enable TURN. The phone shows the audio link state during a call. |
-| Lost the setup code | `docker compose restart sieflow-phone` prints a new one while no administrator exists. |
+| No hay certificado y Caddy muestra errores de ACME | Que el DNS apunte a este servidor, que los puertos 80/443 estén abiertos y que ningún otro servicio los use. |
+| La página carga pero "Reconectando" no termina | El proxy inverso almacena el SSE en búfer: desactívalo (ver nginx arriba). |
+| Meta no puede verificar el webhook | La URL debe ser HTTPS pública y terminar en `/webhook`; el token de verificación debe coincidir con el que muestra la configuración guiada. |
+| Las llamadas timbran pero no hay audio | La red del operador bloquea UDP: activa TURN. El teléfono muestra el estado del enlace de audio durante la llamada. |
+| Se perdió el código de configuración | `docker compose restart sieflow-phone` imprime uno nuevo mientras no exista un administrador. |

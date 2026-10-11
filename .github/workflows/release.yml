@@ -3,7 +3,8 @@ name: release
 # Push a tag like v0.1.0 (matching "version" in package.json) to publish:
 #   - ghcr.io/integralaia/sieflow-phone:0.1.0, :0.1 and :latest (amd64 + arm64, with SBOM and provenance);
 #     prereleases like v0.2.0-rc.1 never become :latest
-#   - a GitHub release whose notes come from the matching CHANGELOG.md section
+#   - a GitHub release whose notes come from the matching sections of CHANGELOG.md (Spanish)
+#     and CHANGELOG.en.md (English); the release fails if either one is missing
 on:
   push:
     tags: ['v*.*.*']
@@ -80,24 +81,50 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
-      - name: Release notes from CHANGELOG.md
+      - name: Release notes from the changelogs (Spanish, then English)
         run: |
           version="${GITHUB_REF_NAME#v}"
-          awk -v v="$version" '
-            $0 ~ "^## \\[" v "\\]" { on = 1; next }
-            on && /^## \[/ { exit }
-            on { print }
-          ' CHANGELOG.md > notes.md
+          # The version's section, up to the next version or the link references.
+          section() {
+            awk -v v="$version" '
+              $0 ~ "^## \\[" v "\\]" { on = 1; next }
+              on && /^## \[/ { exit }
+              on && /^\[[^]]+\]: / { exit }
+              on { print }
+            ' "$1"
+          }
+          for f in CHANGELOG.md CHANGELOG.en.md; do
+            if [ -z "$(section "$f" | tr -d '[:space:]')" ]; then
+              echo "::error file=$f::No section for $version in $f"
+              exit 1
+            fi
+          done
+          base="https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}"
+          image="ghcr.io/${GITHUB_REPOSITORY,,}:${version}"
           {
+            section CHANGELOG.md
+            echo
+            echo "### Instalación"
+            echo
+            echo '```bash'
+            echo "docker pull ${image}"
+            echo '```'
+            echo
+            echo "Paso a paso (también para agentes de IA): [INSTALL-WITH-AI.md](${base}/INSTALL-WITH-AI.md)"
+            echo
+            echo "---"
+            echo
+            echo "## English"
+            section CHANGELOG.en.md
             echo
             echo "### Install"
             echo
             echo '```bash'
-            echo "docker pull ghcr.io/${GITHUB_REPOSITORY,,}:${version}"
+            echo "docker pull ${image}"
             echo '```'
             echo
-            echo "Step by step (also for AI agents): [INSTALL-WITH-AI.md](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/INSTALL-WITH-AI.md)"
-          } >> notes.md
+            echo "Step by step (also for AI agents): [INSTALL-WITH-AI.en.md](${base}/INSTALL-WITH-AI.en.md)"
+          } > notes.md
           cat notes.md
       - name: Create the GitHub release
         env:

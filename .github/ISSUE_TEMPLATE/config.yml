@@ -1,5 +1,5 @@
 blank_issues_enabled: true
 contact_links:
-  - name: Security vulnerability
+  - name: Vulnerabilidad de seguridad · Security vulnerability
     url: https://github.com/IntegraLaIA/sieflow-phone/security/advisories/new
-    about: Report security problems privately, never in a public issue.
+    about: Reporta los problemas de seguridad en privado, nunca en un issue público. Report security problems privately, never in a public issue.
