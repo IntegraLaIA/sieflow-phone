@@ -1,38 +1,44 @@
-# Changelog
+# Registro de cambios
 
-All notable changes to SieFlow Phone are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
+**Español** · [English](CHANGELOG.en.md)
 
-## [Unreleased]
+Aquí se documentan los cambios relevantes de SieFlow Phone. El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
+
+## [Sin publicar]
+
+### Documentación
+- El español pasa a ser el idioma principal del repositorio: `README.md`, `INSTALL-WITH-AI.md` y `CHANGELOG.md` en español, con sus versiones en inglés en `*.en.md`. La política de seguridad, la guía para contribuir, el código de conducta y las plantillas de issues y pull requests quedan en los dos idiomas.
+- Las notas de cada versión se publican en español y en inglés.
 
 ## [0.1.0] - 2026-10-11
 
-First public release.
+Primera versión pública.
 
-### Phone
-- Answer incoming WhatsApp calls in the browser: they ring on every signed-in operator and the first one to answer takes the call.
-- Place calls to WhatsApp users, with the call permission flow WhatsApp requires.
-- Mute, keypad tones (DTMF), microphone and speaker selection, recent calls.
-- Floating phone in an always-on-top window (Document Picture-in-Picture, Chrome and Edge).
-- Audio goes straight between the browser and WhatsApp over WebRTC: no SIP server, no media server.
+### Teléfono
+- Contesta en el navegador las llamadas entrantes de WhatsApp: timbran en todos los operadores conectados y la toma el primero que conteste.
+- Llama a usuarios de WhatsApp, con el flujo de permiso de llamada que exige WhatsApp.
+- Silenciar, tonos del teclado (DTMF), elección de micrófono y parlante, llamadas recientes.
+- Teléfono flotante en una ventana siempre encima (Document Picture-in-Picture, Chrome y Edge).
+- El audio va directo entre el navegador y WhatsApp por WebRTC: sin servidor SIP ni servidor de medios.
 
-### Shared inbox
-- Conversations with messages and calls in one thread: text, photos, voice notes, video, documents, locations, contacts, replies and reactions.
-- Replies inside the 24-hour customer service window and approved templates outside it (positional and named parameters).
-- Call permission requests from the chat: interactive message inside the window, template with the permission button outside it.
-- Mine / Unassigned / All, search, assignment, resolve and reopen, unread counts and read receipts.
+### Bandeja compartida
+- Conversaciones con mensajes y llamadas en un solo hilo: texto, fotos, notas de voz, video, documentos, ubicaciones, contactos, respuestas y reacciones.
+- Respuestas dentro de la ventana de atención de 24 horas y plantillas aprobadas fuera de ella (parámetros posicionales y con nombre).
+- Solicitudes de permiso de llamada desde el chat: mensaje interactivo dentro de la ventana y plantilla con el botón de permiso fuera de ella.
+- Mías / Sin asignar / Todas, búsqueda, asignación, resolver y reabrir, conteo de no leídos y confirmaciones de lectura.
 
-### Setup and operations
-- Guided setup in the browser: administrator account protected by a code from the server logs, live checks of the Meta app and token, discovery of WhatsApp accounts and numbers, automatic webhook configuration, calling requirements and team.
-- Settings stored in SQLite (`node:sqlite`); environment variables still work and lock the matching field.
-- Single container with zero npm dependencies, optional Caddy (HTTPS) and coturn (TURN) profiles.
-- Demo mode with a mock WhatsApp API and a user simulator.
-- English and Spanish, light and dark themes, installable as a desktop app.
+### Configuración y operación
+- Configuración guiada en el navegador: cuenta de administrador protegida por un código de los logs del servidor, verificación en vivo de la app y el token de Meta, búsqueda de cuentas y números de WhatsApp, configuración automática del webhook, requisitos de llamadas y equipo.
+- Ajustes guardados en SQLite (`node:sqlite`); las variables de entorno siguen funcionando y bloquean el campo correspondiente.
+- Un solo contenedor sin dependencias de npm, con perfiles opcionales de Caddy (HTTPS) y coturn (TURN).
+- Modo demo con una API de WhatsApp simulada y un simulador del usuario.
+- Español e inglés, tema claro y oscuro, instalable como app de escritorio.
 
-### Security and privacy
-- Signed webhooks only, one-time setup code with rate limiting, scrypt passwords, sessions tied to the password and revoked on sign-out, rate-limited sign-in that a spoofed `X-Forwarded-For` cannot bypass.
-- Strict CSP, HSTS, `__Host-` cookies over HTTPS, media proxy limited to Meta hosts.
-- Container runs unprivileged on a read-only filesystem with no capabilities; the database is readable only by its owner.
-- `RETENTION_DAYS`, deletion of a contact with all its history, no message text in logs or notifications.
+### Seguridad y privacidad
+- Solo webhooks firmados, código de configuración de un solo uso con límite de intentos, contraseñas scrypt, sesiones atadas a la contraseña y revocadas al cerrar sesión, inicio de sesión con límite de intentos que un `X-Forwarded-For` falsificado no puede saltar.
+- CSP estricta, HSTS, cookies `__Host-` sobre HTTPS, proxy de medios limitado a los hosts de Meta.
+- El contenedor corre sin privilegios, con sistema de archivos de solo lectura y sin capacidades; la base de datos solo la puede leer su dueño.
+- `RETENTION_DAYS`, borrado de un contacto con todo su historial, sin texto de los mensajes en los logs ni en las notificaciones.
 
-[Unreleased]: https://github.com/IntegraLaIA/sieflow-phone/compare/v0.1.0...HEAD
+[Sin publicar]: https://github.com/IntegraLaIA/sieflow-phone/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/IntegraLaIA/sieflow-phone/releases/tag/v0.1.0

@@ -1,18 +1,18 @@
 ---
-name: Bug report
-about: Something does not work as expected
+name: Reportar un error · Bug report
+about: Algo no funciona como esperabas · Something does not work as expected
 labels: bug
 ---
 
-**What happened**
+**Qué pasó · What happened**
 
-**What you expected**
+**Qué esperabas · What you expected**
 
-**Steps to reproduce**
+**Pasos para reproducirlo · Steps to reproduce**
 1.
 
-**Version** (from `/healthz`):
-**Browser and OS:**
-**Deployment** (Docker compose, reverse proxy, TURN):
+**Versión · Version** (de/from `/healthz`):
+**Navegador y sistema operativo · Browser and OS:**
+**Instalación · Deployment** (Docker compose, proxy inverso/reverse proxy, TURN):
 
-<!-- Never paste tokens, app secrets or customer phone numbers. -->
+<!-- Nunca pegues tokens, el App Secret ni números de clientes. Never paste tokens, app secrets or customer phone numbers. -->

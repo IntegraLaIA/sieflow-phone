@@ -1,11 +1,11 @@
 ---
-name: Feature request
-about: Suggest an idea for SieFlow Phone
+name: Proponer una mejora · Feature request
+about: Sugiere una idea para SieFlow Phone · Suggest an idea for SieFlow Phone
 labels: enhancement
 ---
 
-**The problem you want to solve**
+**El problema que quieres resolver · The problem you want to solve**
 
-**What you would like to happen**
+**Qué te gustaría que pasara · What you would like to happen**
 
-**Alternatives you considered**
+**Alternativas que consideraste · Alternatives you considered**

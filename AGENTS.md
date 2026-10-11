@@ -1,6 +1,6 @@
 # Notes for AI coding agents
 
-These notes are for agents changing the code. To install SieFlow Phone on a server, follow [INSTALL-WITH-AI.md](INSTALL-WITH-AI.md) instead.
+These notes are for agents changing the code. To install SieFlow Phone on a server, follow [INSTALL-WITH-AI.md](INSTALL-WITH-AI.md) (Spanish) or [INSTALL-WITH-AI.en.md](INSTALL-WITH-AI.en.md) (English) instead.
 
 ## Map
 
@@ -26,5 +26,6 @@ npm run demo      # demo on :8080 (demo / demo1234), simulator at /simulator
 - WhatsApp rules the code depends on: send the same SDP in `pre_accept` and `accept`; media only after `accept` returns 200; free-form messages only within 24 hours of the customer's last message, templates otherwise; outgoing calls need the user's call permission.
 - Build DOM with `h()` and `textContent`; never put untrusted data in `innerHTML`.
 - Add every UI string to both languages in `public/i18n.js`.
+- Docs are bilingual and Spanish comes first: `README.md`, `INSTALL-WITH-AI.md` and `CHANGELOG.md` are Spanish, their `*.en.md` twins English; `SECURITY.md`, `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md` carry both. Change both versions in the same commit.
 - Keep the page CSP intact: no inline scripts or styles, no new third-party origins.
 - Test server changes through HTTP against the demo mock in `test/server.test.js`.
