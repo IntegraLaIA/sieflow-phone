@@ -6,7 +6,7 @@
 [![Release](https://img.shields.io/github/v/release/IntegraLaIA/sieflow-phone)](https://github.com/IntegraLaIA/sieflow-phone/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-Part of [SieFlow](https://sieflow.ai), by INTEGRALAIA (Bogotá, Colombia). · [Español](README.md) · **English**
+Website: [phone.sieflow.ai](https://phone.sieflow.ai/en/) · Made by INTEGRALAIA (Bogotá, Colombia) · [Español](README.md) · **English**
 
 ![SieFlow Phone: shared inbox, conversation and a WhatsApp call in progress](docs/images/workspace.png)
 
@@ -125,6 +125,12 @@ Read [SECURITY.md](SECURITY.md) for the details and how to report a vulnerabilit
 - Audio calls only, one call per operator at a time. Operators reply with text and templates; sending files is not built yet.
 - No call transfer, recording or server-side transcription: the audio never reaches the server, which is what keeps it light.
 - One instance and one WhatsApp number per instance.
+
+## SieFlow Phone Cloud
+
+Rather not run a server? We're working on SieFlow Phone Cloud: the same thing, but we'll host it, update it and back it up for you. Pricing is not set yet. [Join the waitlist](https://phone.sieflow.ai/en/#cloud) and we'll email you when it opens.
+
+The self-hosted version stays free, under the MIT license, with no features held back.
 
 ## Development
 

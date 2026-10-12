@@ -6,7 +6,7 @@
 [![Release](https://img.shields.io/github/v/release/IntegraLaIA/sieflow-phone)](https://github.com/IntegraLaIA/sieflow-phone/releases)
 [![Licencia: MIT](https://img.shields.io/badge/licencia-MIT-green)](LICENSE)
 
-Parte de [SieFlow](https://sieflow.ai), de INTEGRALAIA (Bogotá, Colombia). · **Español** · [English](README.en.md)
+Sitio: [phone.sieflow.ai](https://phone.sieflow.ai) · Un producto de INTEGRALAIA (Bogotá, Colombia) · **Español** · [English](README.en.md)
 
 ![SieFlow Phone: bandeja compartida, conversación y una llamada de WhatsApp en curso](docs/images/workspace.png)
 
@@ -125,6 +125,12 @@ Detalles y cómo reportar una vulnerabilidad en [SECURITY.md](SECURITY.md).
 - Solo llamadas de audio, una por operador a la vez. Los operadores responden con texto y plantillas; enviar archivos aún no está.
 - Sin transferencia, grabación ni transcripción en el servidor: el audio nunca llega al servidor, y eso es lo que lo mantiene liviano.
 - Una instancia y un número de WhatsApp por instancia.
+
+## SieFlow Phone Cloud
+
+¿Prefieres no montar servidor? Estamos preparando SieFlow Phone Cloud: lo mismo, pero lo hospedaremos, actualizaremos y respaldaremos nosotros. Precio por definir. [Apúntate a la lista de espera](https://phone.sieflow.ai/#cloud) y te escribimos cuando abramos.
+
+La versión self-hosted sigue siendo gratis, con licencia MIT y sin funciones recortadas.
 
 ## Desarrollo
 
