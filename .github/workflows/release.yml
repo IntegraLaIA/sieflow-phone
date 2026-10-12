@@ -1,13 +1,24 @@
 name: release
 
-# Push a tag like v0.1.0 (matching "version" in package.json) to publish:
-#   - ghcr.io/integralaia/sieflow-phone:0.1.0, :0.1 and :latest (amd64 + arm64, with SBOM and provenance);
-#     prereleases like v0.2.0-rc.1 never become :latest
-#   - a GitHub release whose notes come from the matching sections of CHANGELOG.md (Spanish)
-#     and CHANGELOG.en.md (English); the release fails if either one is missing
+# Two steps, so nothing ships without someone looking at it first:
+#
+# 1. Draft. Actions > release > Run workflow, with the version (for example 1.0.0).
+#    It checks that the version matches package.json, runs the tests, builds the notes
+#    from the matching sections of CHANGELOG.md (Spanish) and CHANGELOG.en.md (English)
+#    and creates release vX.Y.Z as a DRAFT on that commit. It fails if either changelog
+#    is missing the version or the release already exists.
+# 2. Publish. Publishing the draft on GitHub creates the tag and runs this workflow
+#    again, which builds and pushes ghcr.io/integralaia/sieflow-phone:X.Y.Z, :X.Y and
+#    :latest (amd64 + arm64, with SBOM and provenance). Prereleases like v0.2.0-rc.1
+#    never become :latest.
 on:
-  push:
-    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version without the v, the same as package.json (for example 1.0.0)'
+        required: true
+  release:
+    types: [published]
 
 permissions:
   contents: read
@@ -22,17 +33,21 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
-      - name: Tag matches package.json
+      - name: Version matches package.json
+        env:
+          # The tag being published, or the version typed in when drafting.
+          TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || format('v{0}', inputs.version) }}
         run: |
           version="$(node -p "require('./package.json').version")"
-          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
-            echo "Tag $GITHUB_REF_NAME does not match package.json version $version" >&2
+          if [ "v$version" != "$TAG" ]; then
+            echo "Version $TAG does not match package.json version $version" >&2
             exit 1
           fi
       - run: npm test
 
   image:
     needs: test
+    if: github.event_name == 'release'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -72,21 +87,30 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-  github-release:
-    needs: image
+  draft:
+    needs: test
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      VERSION: ${{ inputs.version }}
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
+      - name: The release does not exist yet
+        run: |
+          if gh release view "v$VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "::error::Release v$VERSION already exists (draft or published). Delete the draft or bump the version."
+            exit 1
+          fi
       - name: Release notes from the changelogs (Spanish, then English)
         run: |
-          version="${GITHUB_REF_NAME#v}"
           # The version's section, up to the next version or the link references.
           section() {
-            awk -v v="$version" '
+            awk -v v="$VERSION" '
               $0 ~ "^## \\[" v "\\]" { on = 1; next }
               on && /^## \[/ { exit }
               on && /^\[[^]]+\]: / { exit }
@@ -95,12 +119,12 @@ jobs:
           }
           for f in CHANGELOG.md CHANGELOG.en.md; do
             if [ -z "$(section "$f" | tr -d '[:space:]')" ]; then
-              echo "::error file=$f::No section for $version in $f"
+              echo "::error file=$f::No section for $VERSION in $f"
               exit 1
             fi
           done
-          base="https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}"
-          image="ghcr.io/${GITHUB_REPOSITORY,,}:${version}"
+          base="https://github.com/${GITHUB_REPOSITORY}/blob/v${VERSION}"
+          image="ghcr.io/${GITHUB_REPOSITORY,,}:${VERSION}"
           {
             section CHANGELOG.md
             echo
@@ -126,10 +150,10 @@ jobs:
             echo "Step by step (also for AI agents): [INSTALL-WITH-AI.en.md](${base}/INSTALL-WITH-AI.en.md)"
           } > notes.md
           cat notes.md
-      - name: Create the GitHub release
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Create the draft release
         run: |
           flags=()
-          case "$GITHUB_REF_NAME" in *-*) flags+=(--prerelease) ;; esac
-          gh release create "$GITHUB_REF_NAME" --title "SieFlow Phone ${GITHUB_REF_NAME#v}" --notes-file notes.md --verify-tag "${flags[@]}"
+          case "$VERSION" in *-*) flags+=(--prerelease) ;; esac
+          # --target pins the tag that publishing will create to this exact commit.
+          gh release create "v$VERSION" --repo "$GITHUB_REPOSITORY" --draft --target "$GITHUB_SHA" \
+            --title "SieFlow Phone $VERSION" --notes-file notes.md "${flags[@]}"

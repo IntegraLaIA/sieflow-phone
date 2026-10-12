@@ -6,6 +6,16 @@ All notable changes to SieFlow Phone are documented here. The format follows [Ke
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-12
+
+### Added
+- An "About" block in Settings with links to the code and to the SieFlow Phone Cloud waitlist. They are plain links: the app makes no new network calls.
+
+### Changed
+- The project website is now [phone.sieflow.ai](https://phone.sieflow.ai/en/), in English and Spanish.
+- The image declares `org.opencontainers.image.source` and its details (title, description, license and website) in the `Dockerfile`, so a local build is linked to the repository too.
+- Releases start as drafts: the `release` workflow, run by hand with the version, checks `package.json` and both changelogs and creates the draft with the notes; publishing it builds and pushes the image for amd64 and arm64.
+
 ### Documentation
 - Spanish becomes the repository's main language: `README.md`, `INSTALL-WITH-AI.md` and `CHANGELOG.md` are in Spanish, with English versions in `*.en.md`. The security policy, contributing guide, code of conduct and issue and pull request templates carry both languages.
 - Release notes are published in Spanish and English.
@@ -40,5 +50,6 @@ First public release.
 - Container runs unprivileged on a read-only filesystem with no capabilities; the database is readable only by its owner.
 - `RETENTION_DAYS`, deletion of a contact with all its history, no message text in logs or notifications.
 
-[Unreleased]: https://github.com/IntegraLaIA/sieflow-phone/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/IntegraLaIA/sieflow-phone/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/IntegraLaIA/sieflow-phone/compare/v0.1.0...v1.0.0
 [0.1.0]: https://github.com/IntegraLaIA/sieflow-phone/releases/tag/v0.1.0

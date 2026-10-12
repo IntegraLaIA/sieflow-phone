@@ -3,7 +3,7 @@
 
 import assert from 'node:assert/strict';
 import { after, before, describe, test } from 'node:test';
-import { createApp } from '../src/app.js';
+import { createApp, VERSION } from '../src/app.js';
 import { hashPassword } from '../src/auth.js';
 import { loadConfig } from '../src/config.js';
 import { setLogLevel } from '../src/log.js';
@@ -113,7 +113,9 @@ describe('demo instance', () => {
   });
 
   test('health, UI and security headers', async () => {
-    assert.deepEqual((await api.request('/healthz')).data, { ok: true, version: '0.1.0' });
+    // The version comes from package.json, so a release bump does not break this test.
+    assert.match(VERSION, /^\d+\.\d+\.\d+/);
+    assert.deepEqual((await api.request('/healthz')).data, { ok: true, version: VERSION });
     const page = await api.request('/');
     assert.equal(page.status, 200);
     assert.match(page.headers.get('content-security-policy'), /script-src 'self'/);
