@@ -128,7 +128,8 @@ describe('demo instance', () => {
     const page = await api.request('/');
     assert.doesNotMatch(page.headers.get('content-security-policy'), /googleapis|gstatic/);
     assert.match(page.headers.get('content-security-policy'), /font-src 'self'/);
-    assert.doesNotMatch(page.data, /https?:\/\//, 'the page loads nothing from other hosts');
+    // Links to the project are fine; scripts, styles, fonts and images are not.
+    assert.doesNotMatch(page.data, /<(?:script|link|img)\b[^>]*(?:src|href)="(?:https?:)?\/\//i, 'the page loads nothing from other hosts');
     const files = {
       '/favicon.svg': 'image/svg+xml',
       '/favicon.ico': 'image/x-icon',
