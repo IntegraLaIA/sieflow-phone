@@ -1694,6 +1694,20 @@ dialog::backdrop {
   justify-self: start;
 }
 
+.dialog-form > .about {
+  margin: 4px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.dialog-form > .about a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .dialog-actions {
   display: flex;
   justify-content: flex-end;

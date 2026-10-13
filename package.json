@@ -1,6 +1,6 @@
 {
   "name": "sieflow-phone",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Self-hosted WhatsApp calls and chat for teams: browser softphone, shared inbox and guided setup. No SIP server, no media server, zero dependencies.",
   "license": "MIT",
   "type": "module",

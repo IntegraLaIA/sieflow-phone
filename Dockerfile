@@ -3,6 +3,14 @@
 # Pinned by digest; Dependabot proposes updates.
 FROM node:24-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1
 
+# Links the GHCR package to the repository (local builds too) and fills in its details.
+LABEL org.opencontainers.image.source="https://github.com/IntegraLaIA/sieflow-phone" \
+      org.opencontainers.image.url="https://phone.sieflow.ai" \
+      org.opencontainers.image.title="SieFlow Phone" \
+      org.opencontainers.image.description="Self-hosted WhatsApp calls and chat for teams" \
+      org.opencontainers.image.vendor="INTEGRALAIA SAS" \
+      org.opencontainers.image.licenses="MIT"
+
 ENV NODE_ENV=production \
     PORT=8080 \
     DATA_DIR=/data \
