@@ -207,9 +207,39 @@ test('message delivery statuses carry their errors', () => {
     }),
   );
   assert.deepEqual(events, [
-    { type: 'message.status', wamid: 'wamid.1', status: 'delivered', error: null },
-    { type: 'message.status', wamid: 'wamid.2', status: 'failed', error: { code: 131047, message: 'More than 24 hours' } },
+    { type: 'message.status', wamid: 'wamid.1', status: 'delivered', error: null, pricing: null },
+    {
+      type: 'message.status',
+      wamid: 'wamid.2',
+      status: 'failed',
+      error: { code: 131047, message: 'More than 24 hours' },
+      pricing: null,
+    },
   ]);
+});
+
+test('message statuses carry what Meta charges for the message', () => {
+  const events = parseWebhook(
+    envelope('messages', {
+      statuses: [
+        {
+          id: 'wamid.3',
+          status: 'sent',
+          pricing: { billable: true, pricing_model: 'PMP', category: 'service', type: 'regular' },
+        },
+        { id: 'wamid.4', status: 'delivered', pricing: { billable: false, category: 'UTILITY', type: 'free_customer_service' } },
+        { id: 'wamid.5', status: 'delivered', pricing: 'nonsense' },
+      ],
+    }),
+  );
+  assert.deepEqual(
+    events.map((event) => event.pricing),
+    [
+      { billable: true, category: 'service', type: 'regular', model: 'pmp' },
+      { billable: false, category: 'utility', type: 'free_customer_service', model: null },
+      null,
+    ],
+  );
 });
 
 test('events for other phone numbers and other objects are ignored', () => {

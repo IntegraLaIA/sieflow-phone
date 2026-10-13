@@ -188,9 +188,10 @@ export function createDemo(config) {
 
   // ---- messages -------------------------------------------------------------
 
-  const messageStatus = (wamid, to, status) =>
+  // Like Meta, "sent" and "delivered" carry what the message is charged as.
+  const messageStatus = (wamid, to, status, pricing) =>
     postWebhook('messages', {
-      statuses: [{ id: wamid, status, timestamp: String(unixNow()), recipient_id: to }],
+      statuses: [{ id: wamid, status, timestamp: String(unixNow()), recipient_id: to, ...(pricing ? { pricing } : {}) }],
     });
 
   async function permissionReply(waId, contextId, response) {
@@ -220,10 +221,10 @@ export function createDemo(config) {
     });
   }
 
-  async function deliver(to, wamid, shown) {
-    await messageStatus(wamid, to, 'sent');
+  async function deliver(to, wamid, shown, pricing) {
+    await messageStatus(wamid, to, 'sent', pricing);
     hub.send('message', { id: wamid, to, ...shown });
-    await messageStatus(wamid, to, 'delivered');
+    await messageStatus(wamid, to, 'delivered', pricing);
     if (hub.size > 0) {
       setTimeout(() => messageStatus(wamid, to, 'read'), 1200).unref();
     } else if (shown.permission) {
@@ -288,6 +289,8 @@ export function createDemo(config) {
     }
     const to = digits(body.to);
     let shown;
+    // Free-form replies are service messages; templates are charged by category.
+    let pricing = { billable: false, pricing_model: 'PMP', category: 'service', type: 'free_customer_service' };
     if (body.type === 'text') {
       shown = { kind: 'text', body: body.text?.body ?? '' };
     } else if (body.type === 'template') {
@@ -300,6 +303,7 @@ export function createDemo(config) {
         body: renderTemplate(template, body.template.components),
         permission: template.components.some((c) => c.type === 'CALL_PERMISSION_REQUEST'),
       };
+      pricing = { billable: true, pricing_model: 'PMP', category: template.category.toLowerCase(), type: 'regular' };
     } else if (body.type === 'interactive' && body.interactive?.type === 'call_permission_request') {
       shown = { kind: 'call_permission_request', body: body.interactive.body?.text ?? '', permission: true };
     } else {
@@ -307,7 +311,7 @@ export function createDemo(config) {
     }
     const wamid = newId('wamid');
     sendJson(res, 200, { messaging_product: 'whatsapp', contacts: [{ input: to, wa_id: to }], messages: [{ id: wamid }] });
-    setTimeout(() => deliver(to, wamid, shown), 30).unref();
+    setTimeout(() => deliver(to, wamid, shown, pricing), 30).unref();
   }
 
   function graphPermissions(res, url) {

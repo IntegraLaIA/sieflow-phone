@@ -2484,3 +2484,252 @@ dialog::backdrop {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------------------------------------------------------------- message log */
+
+.composer-hint {
+  margin: 6px 4px 0;
+  font-size: 11.5px;
+  color: var(--muted-fg);
+}
+
+.composer-hint.over {
+  color: var(--warn-fg);
+}
+
+.usage-dialog {
+  width: min(860px, calc(100% - 32px));
+}
+
+.usage-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.usage-pricing {
+  margin: -4px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.usage-body {
+  display: grid;
+  gap: 18px;
+}
+
+.usage-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.usage-card {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.usage-card.warn {
+  border-color: transparent;
+  background: var(--warn-soft);
+}
+
+.usage-card-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted-fg);
+}
+
+.usage-card-value {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.usage-card-note {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--muted-fg);
+}
+
+.usage-card.warn .usage-card-note {
+  color: var(--warn-fg);
+}
+
+.usage-bar {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--muted);
+  overflow: hidden;
+}
+
+.usage-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--primary);
+}
+
+.usage-bar.over > span {
+  background: var(--warn-fg);
+}
+
+.usage-failed {
+  justify-self: start;
+  margin: -8px 0 0;
+}
+
+.usage-section {
+  display: grid;
+  gap: 10px;
+}
+
+.usage-section h3 {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.usage-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.usage-table th,
+.usage-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.usage-table th {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted-fg);
+}
+
+.usage-table td + td,
+.usage-table th + th {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.usage-tabs {
+  justify-self: start;
+}
+
+.usage-entries {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.usage-entries .link-btn {
+  margin: 6px 0 0;
+}
+
+.usage-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 12px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.usage-entry:hover {
+  background: var(--muted);
+}
+
+.usage-entry:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.usage-entry-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 10px;
+  background: var(--muted);
+  color: var(--muted-fg);
+}
+
+.usage-entry-icon.out {
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+.usage-entry-main {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.usage-entry-title {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+  font-size: 13px;
+}
+
+.usage-entry-title > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.usage-entry-meta {
+  font-size: 11.5px;
+}
+
+@media (max-width: 640px) {
+  /* Title and close on the first line, month and download on the second. */
+  .usage-head h2 {
+    flex: 1;
+  }
+
+  .usage-head .grow {
+    display: none;
+  }
+
+  .usage-head .js-usage-close {
+    order: 1;
+  }
+
+  .usage-head select {
+    order: 2;
+    flex: 1;
+  }
+
+  .usage-head #usage-export {
+    order: 3;
+  }
+
+  .usage-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .usage-entry-title {
+    flex-direction: column;
+    gap: 0;
+  }
+}

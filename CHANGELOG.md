@@ -8,6 +8,13 @@ Aquí se documentan los cambios relevantes de SieFlow Phone. El formato sigue [K
 
 ## [1.0.0] - 2026-10-12
 
+### Registro de mensajes
+- Desde el 1 de octubre de 2026 Meta cobra cada mensaje entregado, también las respuestas dentro de la ventana de 24 horas (mensajes de servicio, con 1.000 gratis al mes por número). La regla de la ventana no cambia: fuera de ella WhatsApp solo deja enviar plantillas.
+- Registro de mensajes para administradores (ícono de gráfica en el encabezado): por mes, lo recibido, los mensajes de servicio frente a los 1.000 gratis, las plantillas por categoría, lo que Meta reporta como facturable, las llamadas y quién envió qué. Detalle del mes con filtros y descarga en CSV, sin el texto de los mensajes.
+- El compositor avisa que cada respuesta es un mensaje de servicio y cuántos van del mes; el diálogo de plantillas muestra la categoría de cada una y que Meta las cobra.
+- Se guarda lo que Meta informa en cada estado de entrega (`pricing`: facturable, categoría y tipo), y el modo demo lo simula.
+- Los conteos por mes se conservan aunque `RETENTION_DAYS` o el borrado de un contacto eliminen los mensajes (solo conteos, sin datos personales).
+
 ### Añadido
 - En Ajustes, un bloque «Acerca de» con el enlace al código y a la lista de espera de SieFlow Phone Cloud. Son enlaces estáticos: la app no hace ninguna llamada de red nueva.
 

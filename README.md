@@ -18,6 +18,7 @@ Sitio: [phone.sieflow.ai](https://phone.sieflow.ai) · Un producto de INTEGRALAI
 - **Permiso de llamada desde el chat.** Solicitud interactiva dentro de la ventana de 24 horas, plantilla con botón de permiso fuera de ella, y la respuesta aparece en el hilo.
 - **Multiagente sin complicaciones.** Mías / Sin asignar / Todas, la primera respuesta toma la conversación, asignar a un compañero, resolver y reabrir.
 - **Configuración guiada.** Una instancia vacía pide todo en el navegador y verifica cada dato en vivo contra Meta, hasta configurar el webhook por ti.
+- **Registro de mensajes y lo que cobra Meta.** Desde el 1 de octubre de 2026 Meta cobra cada mensaje entregado, también las respuestas dentro de las 24 horas (mensajes de servicio, con 1.000 gratis al mes por número). El compositor muestra cuántas van del mes, y los administradores ven por mes lo recibido, lo enviado por categoría, lo que Meta reporta como facturable, las llamadas y quién envió qué, con el detalle y una descarga en CSV sin el texto de los mensajes.
 - Español e inglés, tema claro y oscuro, instalable como app de escritorio. Un modo demo simula WhatsApp para probar todo sin cuenta de Meta.
 
 ## Pruébalo en un minuto
@@ -115,6 +116,7 @@ No hace falta ninguna: la configuración guiada guarda todo. Si defines alguna, 
 
 - **Tus datos se quedan en tu servidor**: ajustes, operadores, conversaciones y registros de llamadas viven en un archivo SQLite dentro del volumen de datos. El audio de las llamadas nunca llega al servidor.
 - **Retención y borrado**: `RETENTION_DAYS` borra solo los mensajes viejos, y un administrador puede eliminar un contacto con todos sus mensajes y llamadas (útil para la Ley 1581 de 2012 y el RGPD).
+- **Registro de mensajes**: guarda conteos por mes (meses en UTC), que siguen ahí aunque se borren los mensajes. El detalle y el CSV traen números, nombres y estados, nunca el texto, y solo los ven los administradores.
 - **Seguro por defecto**: solo webhooks firmados, código de configuración de un solo uso, contraseñas scrypt, sesiones que terminan al cambiar la contraseña, límite de intentos, CSP estricta, HSTS y un contenedor sin privilegios con sistema de archivos de solo lectura.
 - La única petición a terceros desde el navegador es la fuente Quicksand de Google Fonts.
 

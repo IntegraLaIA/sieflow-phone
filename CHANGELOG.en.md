@@ -8,6 +8,13 @@ All notable changes to SieFlow Phone are documented here. The format follows [Ke
 
 ## [1.0.0] - 2026-10-12
 
+### Message log
+- Since October 1, 2026 Meta charges every delivered message, replies inside the 24-hour window included (service messages, 1,000 free a month per number). The window rule itself does not change: outside it WhatsApp only takes templates.
+- Message log for administrators (chart icon in the header): per month, received messages, service messages against the 1,000 free ones, templates by category, what Meta reports as billable, calls and who sent what. The month's detail with filters and a CSV download, without message text.
+- The composer says each reply is a service message and how many the month has used; the template dialog shows each template's category and that Meta charges it.
+- What Meta reports with each delivery status is stored (`pricing`: billable, category and type), and the demo simulates it.
+- Monthly counts stay when `RETENTION_DAYS` or erasing a contact delete the messages (counts only, no personal data).
+
 ### Added
 - An "About" block in Settings with links to the code and to the SieFlow Phone Cloud waitlist. They are plain links: the app makes no new network calls.
 

@@ -26,6 +26,7 @@ Las correcciones de seguridad van en la última versión. Para actualizar, desca
 - **El contenedor** corre con un usuario sin privilegios, sistema de archivos de solo lectura, sin capacidades de Linux y con `no-new-privileges` en el compose incluido.
 - **El audio de las llamadas nunca llega al servidor**: viaja por WebRTC (DTLS-SRTP) entre el navegador y WhatsApp.
 - **Privacidad**: los logs no llevan el texto de los mensajes ni números de teléfono, las notificaciones de escritorio no muestran el texto de los mensajes, `RETENTION_DAYS` borra los mensajes y registros de llamadas viejos, y un administrador puede eliminar un contacto con todo su historial (útil para la Ley 1581 de 2012 y el RGPD).
+- **Registro de mensajes**: guarda conteos por mes sin datos personales. El detalle y la descarga en CSV traen números, nombres y estados de entrega, nunca el texto de los mensajes, y solo los pueden ver los administradores; trata ese archivo como datos personales.
 
 ### Lista de endurecimiento para quien lo opera
 
@@ -61,6 +62,7 @@ Security fixes go into the latest release. Upgrade by pulling the new image: `do
 - **The container** runs as an unprivileged user with a read-only filesystem, no Linux capabilities and `no-new-privileges` in the provided compose file.
 - **Call audio never reaches the server**: it flows over WebRTC (DTLS-SRTP) between the browser and WhatsApp.
 - **Privacy**: logs carry no message text or phone numbers, desktop notifications show no message text, `RETENTION_DAYS` deletes old messages and call records, and administrators can delete a contact with all its history.
+- **Message log**: keeps monthly counts without personal data. The detail and the CSV download carry numbers, names and delivery statuses, never message text, and only administrators can see them; treat that file as personal data.
 
 ### Hardening checklist for operators
 

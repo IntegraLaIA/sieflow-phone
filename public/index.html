@@ -83,6 +83,9 @@
           <button id="settings-btn" class="icon-btn" type="button" data-i18n-title="settings">
             <span data-icon="settings"></span>
           </button>
+          <button id="usage-btn" class="icon-btn" type="button" data-i18n-title="usage" hidden>
+            <span data-icon="chart"></span>
+          </button>
           <button id="admin-btn" class="icon-btn" type="button" data-i18n-title="adminSettings" hidden>
             <span data-icon="sliders"></span>
           </button>
@@ -214,6 +217,24 @@
           <button class="btn primary js-permission-send" type="button" data-i18n="send"></button>
         </div>
       </form>
+    </dialog>
+
+    <dialog id="usage-dialog" class="wide usage-dialog">
+      <div class="dialog-form">
+        <div class="usage-head">
+          <h2 data-i18n="usage"></h2>
+          <span class="grow"></span>
+          <select id="usage-month" class="compact" data-i18n-aria="usageMonth"></select>
+          <a id="usage-export" class="btn small" href="#" download>
+            <span data-icon="download"></span><span data-i18n="usageExport"></span>
+          </a>
+          <button type="button" class="icon-btn small js-usage-close" data-i18n-title="close">
+            <span data-icon="x"></span>
+          </button>
+        </div>
+        <p class="muted usage-pricing" data-i18n="usagePricing"></p>
+        <div id="usage-body" class="usage-body"></div>
+      </div>
     </dialog>
 
     <div id="toasts" class="toasts" aria-live="polite"></div>

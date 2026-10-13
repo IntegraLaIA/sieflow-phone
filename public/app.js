@@ -6,6 +6,7 @@ import { applyI18n, languageSetting, setLanguage, t } from './i18n.js';
 import * as inbox from './inbox.js';
 import * as phone from './phone.js';
 import { $, h, hydrateIcons, initials, initTheme, toast } from './ui.js';
+import * as usage from './usage.js';
 import * as wizard from './wizard.js';
 
 const app = { me: null, events: null, online: false, agents: [], started: false };
@@ -48,6 +49,7 @@ function renderHeader() {
   $('#me').replaceChildren(h('span', { class: 'initials', text: initials(user) }), h('span', { class: 'name', text: user }));
   $('#business-number').textContent = app.me?.displayNumber ?? '';
   $('#admin-btn').hidden = app.me?.role !== 'admin';
+  $('#usage-btn').hidden = app.me?.role !== 'admin';
   $('#demo-banner').hidden = !app.me?.demo;
   renderStatus();
   updateChrome();
@@ -152,6 +154,7 @@ function showWorkspace() {
       },
       onChange: updateChrome,
     });
+    usage.init({ openConversation: (id) => inbox.select(id) });
   }
   renderHeader();
   connectEvents();
@@ -238,6 +241,7 @@ function bindStatic() {
     await fillDeviceSelects();
     phone.relabel();
     inbox.refreshLabels();
+    usage.relabel();
     wizard.relabel();
     if (app.me) renderHeader();
   });
@@ -250,6 +254,7 @@ function bindStatic() {
     updateChrome();
   });
   $('#phone-toggle').addEventListener('click', () => setPhoneOpen(!document.body.classList.contains('phone-open')));
+  $('#usage-btn').addEventListener('click', () => usage.open());
   $('#admin-btn').addEventListener('click', () => {
     location.href = '/setup';
   });

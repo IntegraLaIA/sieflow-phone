@@ -5,7 +5,7 @@ import { chmodSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 
-const MIGRATIONS = [
+export const MIGRATIONS = [
   `CREATE TABLE contacts (
      wa_id TEXT PRIMARY KEY,
      name TEXT,
@@ -59,6 +59,25 @@ const MIGRATIONS = [
      value TEXT NOT NULL,
      updated_at INTEGER NOT NULL
    );`,
+  // 3: what each message costs. "category" is what SieFlow Phone sent (service
+  // for free-form replies, or the template's category); billable and pricing_*
+  // are what Meta reports in its status webhooks. usage_archive keeps the monthly
+  // counts of messages that RETENTION_DAYS or an erasure removes (counts only).
+  `ALTER TABLE messages ADD COLUMN category TEXT;
+   ALTER TABLE messages ADD COLUMN billable INTEGER;
+   ALTER TABLE messages ADD COLUMN pricing_category TEXT;
+   ALTER TABLE messages ADD COLUMN pricing_type TEXT;
+   UPDATE messages SET category = CASE
+       WHEN kind = 'template' OR json_extract(data, '$.template') IS NOT NULL THEN 'template'
+       ELSE 'service' END
+     WHERE direction = 'out' AND kind <> 'call';
+   CREATE INDEX messages_created ON messages(created_at);
+   CREATE TABLE usage_archive (
+     month TEXT NOT NULL,
+     metric TEXT NOT NULL,
+     value INTEGER NOT NULL DEFAULT 0,
+     PRIMARY KEY (month, metric)
+   );`,
 ];
 
 const STATUS_RANK = { pending: 0, sent: 1, delivered: 2, read: 3 };
@@ -96,7 +115,80 @@ function toMessage(row) {
     error: row.error,
     agent: row.agent,
     reaction: row.reaction,
+    category: row.category ?? null,
+    billable: row.billable === null || row.billable === undefined ? null : row.billable === 1,
+    pricingCategory: row.pricing_category ?? null,
+    pricingType: row.pricing_type ?? null,
     createdAt: row.created_at,
+  };
+}
+
+// Months are UTC calendar months, "YYYY-MM".
+export const monthOf = (ms) => new Date(ms).toISOString().slice(0, 7);
+const monthStart = (month) => Date.UTC(Number(month.slice(0, 4)), Number(month.slice(5, 7)) - 1, 1);
+const monthEnd = (month) => Date.UTC(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 1);
+
+// Messages grouped by everything the monthly counts depend on.
+const USAGE_ROWS = `
+  SELECT strftime('%Y-%m', created_at / 1000, 'unixepoch') AS month, direction, kind, category, status, billable, agent,
+         COUNT(*) AS n,
+         COALESCE(SUM(CASE WHEN kind = 'call' THEN json_extract(data, '$.duration') END), 0) AS seconds
+  FROM messages`;
+const USAGE_GROUP = 'GROUP BY month, direction, kind, category, status, billable, agent';
+
+// One group of messages -> what it adds to its month. The same rules count live
+// messages and the ones about to be pruned or erased, so the counts outlive them.
+function addUsage(metrics, row) {
+  const add = (metric, value = row.n) => {
+    if (value) metrics[metric] = (metrics[metric] ?? 0) + value;
+  };
+  if (row.kind === 'call') {
+    const side = row.direction === 'in' ? 'in' : 'out';
+    add(`calls.${side}`);
+    add(`calls.${side}_seconds`, Math.round(Number(row.seconds) || 0));
+    if (row.agent) add(`agent.${row.agent}.calls`);
+    return;
+  }
+  if (row.direction === 'in') {
+    add('received');
+    return;
+  }
+  const category = row.category || 'service';
+  add(`sent.${category}`);
+  if (row.status === 'delivered' || row.status === 'read') add(`delivered.${category}`);
+  if (row.status === 'failed') add('failed');
+  if (row.billable === 1) add('billable');
+  if (row.agent) add(`agent.${row.agent}.messages`);
+}
+
+function usageByMonth(rows, months = new Map()) {
+  for (const row of rows) {
+    if (!months.has(row.month)) months.set(row.month, {});
+    addUsage(months.get(row.month), row);
+  }
+  return months;
+}
+
+function logEntry(row) {
+  const message = toMessage(row);
+  return {
+    id: message.id,
+    conversationId: message.conversationId,
+    createdAt: message.createdAt,
+    direction: message.direction,
+    kind: message.kind,
+    category: message.category,
+    template: message.data?.template ?? null,
+    status: message.status,
+    error: message.error,
+    billable: message.billable,
+    pricingCategory: message.pricingCategory,
+    pricingType: message.pricingType,
+    agent: message.agent,
+    duration: message.kind === 'call' ? (message.data?.duration ?? 0) : null,
+    outcome: message.kind === 'call' ? (message.data?.outcome ?? null) : null,
+    waId: row.wa_id,
+    name: row.name,
   };
 }
 
@@ -161,9 +253,9 @@ export class Store {
         FROM conversations WHERE status = 'open'`),
       insertMessage: q(`
         INSERT OR IGNORE INTO messages
-          (conversation_id, wamid, direction, kind, body, media_id, media_mime, filename, data, reply_to, status, error, agent, created_at)
+          (conversation_id, wamid, direction, kind, body, media_id, media_mime, filename, data, reply_to, status, error, agent, category, created_at)
         VALUES
-          (:conversation_id, :wamid, :direction, :kind, :body, :media_id, :media_mime, :filename, :data, :reply_to, :status, :error, :agent, :created_at)`),
+          (:conversation_id, :wamid, :direction, :kind, :body, :media_id, :media_mime, :filename, :data, :reply_to, :status, :error, :agent, :category, :created_at)`),
       touchConversation: q(`
         UPDATE conversations SET
           last_message_at = :at, last_kind = :kind, last_preview = :preview, last_direction = :direction,
@@ -175,6 +267,7 @@ export class Store {
       messageById: q('SELECT * FROM messages WHERE id = ?'),
       messageByWamid: q('SELECT * FROM messages WHERE wamid = ?'),
       updateStatus: q('UPDATE messages SET status = :status, error = :error WHERE id = :id'),
+      setPricing: q('UPDATE messages SET billable = :billable, pricing_category = :category, pricing_type = :type WHERE id = :id'),
       setReaction: q('UPDATE messages SET reaction = :reaction WHERE id = :id'),
       thread: q('SELECT * FROM messages WHERE conversation_id = :id AND id < :before ORDER BY id DESC LIMIT :limit'),
       lastInbound: q(`SELECT wamid FROM messages WHERE conversation_id = ? AND direction = 'in' AND wamid IS NOT NULL ORDER BY id DESC LIMIT 1`),
@@ -191,6 +284,23 @@ export class Store {
       deleteMessages: q('DELETE FROM messages WHERE conversation_id = ?'),
       deleteConversation: q('DELETE FROM conversations WHERE id = ?'),
       deleteContact: q('DELETE FROM contacts WHERE wa_id = ?'),
+      usageSince: q(`${USAGE_ROWS} WHERE created_at >= ? ${USAGE_GROUP}`),
+      usageBefore: q(`${USAGE_ROWS} WHERE created_at < ? ${USAGE_GROUP}`),
+      usageOfConversation: q(`${USAGE_ROWS} WHERE conversation_id = ? ${USAGE_GROUP}`),
+      archivedUsage: q('SELECT month, metric, value FROM usage_archive WHERE month >= ?'),
+      archiveUsage: q(`
+        INSERT INTO usage_archive (month, metric, value) VALUES (:month, :metric, :value)
+        ON CONFLICT(month, metric) DO UPDATE SET value = value + excluded.value`),
+      messageLog: q(`
+        SELECT m.*, c.wa_id, k.name FROM messages m
+        JOIN conversations c ON c.id = m.conversation_id JOIN contacts k ON k.wa_id = c.wa_id
+        WHERE m.created_at >= :from AND m.created_at < :to AND m.id < :before
+          AND (:filter = ''
+               OR (:filter = 'received' AND m.direction = 'in' AND m.kind <> 'call')
+               OR (:filter = 'sent' AND m.direction = 'out' AND m.kind <> 'call')
+               OR (:filter = 'calls' AND m.kind = 'call'))
+          AND (:agent = '' OR m.agent = :agent)
+        ORDER BY m.id DESC LIMIT :limit`),
       allSettings: q('SELECT key, value FROM settings'),
       setSetting: q(`
         INSERT INTO settings (key, value, updated_at) VALUES (:key, :value, :now)
@@ -328,6 +438,7 @@ export class Store {
       status: message.status ?? null,
       error: message.error ?? null,
       agent: message.agent ?? null,
+      category: message.category ?? null,
       created_at: at,
     });
     if (result.changes === 0) return null;
@@ -354,16 +465,30 @@ export class Store {
     return { messages: rows.slice(0, limit).reverse().map(toMessage), hasMore };
   }
 
-  // Delivery statuses only move forward; "failed" always wins.
-  updateStatus(wamid, status, error = null) {
+  // Delivery statuses only move forward; "failed" always wins. Meta's pricing,
+  // when a status carries it, is stored whatever the status does.
+  updateStatus(wamid, status, error = null, pricing = null) {
     const row = this.sql.messageByWamid.get(wamid);
     if (!row) return null;
-    if (status !== 'failed') {
-      if (!Object.hasOwn(STATUS_RANK, status) || row.status === 'failed') return null;
-      if ((STATUS_RANK[row.status] ?? -1) >= STATUS_RANK[status]) return null;
+    let changed = false;
+    if (pricing && (pricing.billable !== null || pricing.category || pricing.type)) {
+      this.sql.setPricing.run({
+        id: row.id,
+        billable: pricing.billable === null ? row.billable : pricing.billable ? 1 : 0,
+        category: pricing.category ?? row.pricing_category,
+        type: pricing.type ?? row.pricing_type,
+      });
+      changed = true;
     }
-    this.sql.updateStatus.run({ id: row.id, status, error: error ?? null });
-    return toMessage(this.sql.messageById.get(row.id));
+    const advances =
+      status === 'failed'
+        ? true
+        : Object.hasOwn(STATUS_RANK, status) && row.status !== 'failed' && (STATUS_RANK[row.status] ?? -1) < STATUS_RANK[status];
+    if (advances) {
+      this.sql.updateStatus.run({ id: row.id, status, error: error ?? null });
+      changed = true;
+    }
+    return changed ? toMessage(this.sql.messageById.get(row.id)) : null;
   }
 
   setReaction(wamid, emoji) {
@@ -373,6 +498,10 @@ export class Store {
     return toMessage(this.sql.messageById.get(row.id));
   }
 
+  hasMessage(wamid) {
+    return Boolean(this.sql.messageByWamid.get(wamid));
+  }
+
   hasMedia(mediaId) {
     return Boolean(this.sql.hasMedia.get(mediaId));
   }
@@ -380,10 +509,19 @@ export class Store {
   // ---- privacy ----
 
   // RETENTION_DAYS: messages and call records older than the cutoff go away.
+  // Their monthly counts stay in usage_archive.
   prune(cutoff) {
-    const removed = this.sql.pruneMessages.run(cutoff).changes;
-    this.sql.prunePreviews.run(cutoff);
-    return removed;
+    this.db.exec('BEGIN');
+    try {
+      this.#archiveUsage(this.sql.usageBefore.all(cutoff));
+      const removed = this.sql.pruneMessages.run(cutoff).changes;
+      this.sql.prunePreviews.run(cutoff);
+      this.db.exec('COMMIT');
+      return removed;
+    } catch (error) {
+      this.db.exec('ROLLBACK');
+      throw error;
+    }
   }
 
   // Erases a contact with all its messages and calls (data subject requests).
@@ -392,6 +530,7 @@ export class Store {
     if (!conversation) return false;
     this.db.exec('BEGIN');
     try {
+      this.#archiveUsage(this.sql.usageOfConversation.all(id));
       this.sql.deleteMessages.run(id);
       this.sql.deleteConversation.run(id);
       this.sql.deleteContact.run(conversation.waId);
@@ -401,6 +540,39 @@ export class Store {
       throw error;
     }
     return true;
+  }
+
+  // ---- message log ----
+
+  #archiveUsage(rows) {
+    for (const [month, metrics] of usageByMonth(rows)) {
+      for (const [metric, value] of Object.entries(metrics)) this.sql.archiveUsage.run({ month, metric, value });
+    }
+  }
+
+  // Month ("YYYY-MM") -> { metric: count } for every month from `sinceMonth` on:
+  // live messages plus the archived counts of removed ones.
+  usage(sinceMonth) {
+    const months = usageByMonth(this.sql.usageSince.all(monthStart(sinceMonth)));
+    for (const row of this.sql.archivedUsage.all(sinceMonth)) {
+      if (!months.has(row.month)) months.set(row.month, {});
+      const metrics = months.get(row.month);
+      metrics[row.metric] = (metrics[row.metric] ?? 0) + row.value;
+    }
+    return months;
+  }
+
+  // One month of messages and calls, newest first, without the message text.
+  messageLog({ month, filter = '', agent = '', before = Number.MAX_SAFE_INTEGER, limit = 50 }) {
+    const rows = this.sql.messageLog.all({
+      from: monthStart(month),
+      to: monthEnd(month),
+      before,
+      filter,
+      agent,
+      limit: limit + 1,
+    });
+    return { messages: rows.slice(0, limit).map(logEntry), hasMore: rows.length > limit };
   }
 
   // ---- calls ----
