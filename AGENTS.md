@@ -28,5 +28,6 @@ npm run demo      # demo on :8080 (demo / demo1234), simulator at /simulator
 - Build DOM with `h()` and `textContent`; never put untrusted data in `innerHTML`.
 - Add every UI string to both languages in `public/i18n.js`.
 - Docs are bilingual and Spanish comes first: `README.md`, `INSTALL-WITH-AI.md` and `CHANGELOG.md` are Spanish, their `*.en.md` twins English; `SECURITY.md`, `CONTRIBUTING.md` and `CODE_OF_CONDUCT.md` carry both. Change both versions in the same commit.
-- Keep the page CSP intact: no inline scripts or styles, no new third-party origins.
+- Keep the page CSP intact: no inline scripts or styles, no third-party origins (fonts included).
+- Brand: the symbol, logo and wordmark are files in `public/brand`, each with a `-dark` twin swapped by the `.theme-img` classes. Never redraw them with icons or text; see `BRAND.md`.
 - Test server changes through HTTP against the demo mock in `test/server.test.js`.

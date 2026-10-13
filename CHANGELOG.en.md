@@ -8,6 +8,12 @@ All notable changes to SieFlow Phone are documented here. The format follows [Ke
 
 ## [1.0.0] - 2026-10-12
 
+### Brand
+- New SieFlow Phone symbol, logo and wordmark on the sign-in screen, the guided setup, the top bar and the simulator, with light and dark versions that follow the theme.
+- New favicon (theme-aware SVG and `.ico`), iOS icon and installable app icons, the maskable one included.
+- The Quicksand typeface ships with the app instead of coming from Google Fonts: the browser makes no third-party requests and the CSP only allows this server.
+- `BRAND.md`: what the license covers and how to use the name and logo. README screenshots with the new brand.
+
 ### Message log
 - Since October 1, 2026 Meta charges every delivered message, replies inside the 24-hour window included (service messages, 1,000 free a month per number). The window rule itself does not change: outside it WhatsApp only takes templates.
 - Message log for administrators (chart icon in the header): per month, received messages, service messages against the 1,000 free ones, templates by category, what Meta reports as billable, calls and who sent what. The month's detail with filters and a CSV download, without message text.

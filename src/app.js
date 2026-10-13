@@ -40,6 +40,9 @@ const MIME = {
   '.js': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.ico': 'image/x-icon',
+  '.ttf': 'font/ttf',
   '.webmanifest': 'application/manifest+json',
 };
 
@@ -51,13 +54,13 @@ const SECURITY_HEADERS = {
   'permissions-policy': 'microphone=(self), camera=(), geolocation=()',
 };
 
-// Quicksand (the SieFlow typeface) comes from Google Fonts; without it the UI
-// falls back to the system font.
+// Everything comes from this server, the Quicksand typeface included: the
+// browser makes no request to third parties.
 const CSP = [
   "default-src 'self'",
   "script-src 'self'",
-  "style-src 'self' https://fonts.googleapis.com",
-  'font-src https://fonts.gstatic.com',
+  "style-src 'self'",
+  "font-src 'self'",
   "img-src 'self' data: blob:",
   "media-src 'self' blob:",
   "connect-src 'self'",
@@ -78,7 +81,19 @@ const UI_FILES = [
   'wizard.js',
   'style.css',
   'favicon.svg',
+  'favicon.ico',
   'manifest.webmanifest',
+  'brand/sieflow-phone-icon.svg',
+  'brand/sieflow-phone-icon-dark.svg',
+  'brand/sieflow-phone-logo.svg',
+  'brand/sieflow-phone-logo-dark.svg',
+  'brand/sieflow-phone-wordmark.svg',
+  'brand/sieflow-phone-wordmark-dark.svg',
+  'brand/apple-touch-icon.png',
+  'brand/android-chrome-192x192.png',
+  'brand/android-chrome-512x512.png',
+  'brand/maskable-icon-512x512.png',
+  'fonts/Quicksand-VariableFont_wght.ttf',
 ];
 
 // Cached in memory in production; read from disk on every request otherwise,

@@ -1,4 +1,9 @@
-# SieFlow Phone
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="public/brand/sieflow-phone-logo-dark.svg" />
+    <img src="public/brand/sieflow-phone-logo.svg" alt="SieFlow Phone" height="48" />
+  </picture>
+</h1>
 
 **Llamadas y chat de WhatsApp para tu equipo, en tu propio servidor.** Contesta y haz llamadas de voz de WhatsApp desde el navegador y responde los mensajes desde una bandeja compartida. Sin Asterisk, sin troncal SIP y sin servidor de medios: un contenedor pequeño y sin dependencias.
 
@@ -118,7 +123,7 @@ No hace falta ninguna: la configuración guiada guarda todo. Si defines alguna, 
 - **Retención y borrado**: `RETENTION_DAYS` borra solo los mensajes viejos, y un administrador puede eliminar un contacto con todos sus mensajes y llamadas (útil para la Ley 1581 de 2012 y el RGPD).
 - **Registro de mensajes**: guarda conteos por mes (meses en UTC), que siguen ahí aunque se borren los mensajes. El detalle y el CSV traen números, nombres y estados, nunca el texto, y solo los ven los administradores.
 - **Seguro por defecto**: solo webhooks firmados, código de configuración de un solo uso, contraseñas scrypt, sesiones que terminan al cambiar la contraseña, límite de intentos, CSP estricta, HSTS y un contenedor sin privilegios con sistema de archivos de solo lectura.
-- La única petición a terceros desde el navegador es la fuente Quicksand de Google Fonts.
+- **Sin terceros**: el navegador no hace ninguna petición fuera de tu servidor; la fuente Quicksand viene incluida.
 
 Detalles y cómo reportar una vulnerabilidad en [SECURITY.md](SECURITY.md).
 
@@ -145,6 +150,6 @@ Ver [CONTRIBUTING.md](CONTRIBUTING.md). Los issues y pull requests se reciben en
 
 ## Créditos y licencia
 
-Íconos de [Lucide](https://lucide.dev) (ISC). Tipografía [Quicksand](https://fonts.google.com/specimen/Quicksand) (OFL).
+Íconos de [Lucide](https://lucide.dev) (ISC). Tipografía [Quicksand](https://fonts.google.com/specimen/Quicksand) (OFL, incluida en `public/fonts`).
 
-[MIT](LICENSE) © 2026 INTEGRALAIA SAS. WhatsApp es una marca de Meta Platforms, Inc. SieFlow Phone es un proyecto independiente, sin afiliación ni respaldo de Meta.
+[MIT](LICENSE) © 2026 INTEGRALAIA SAS. WhatsApp es una marca de Meta Platforms, Inc. SieFlow Phone es un proyecto independiente, sin afiliación ni respaldo de Meta. La licencia MIT cubre el código, no el nombre ni el logo de SieFlow Phone: ver [BRAND.md](BRAND.md).
