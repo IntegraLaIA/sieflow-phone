@@ -1,5 +1,16 @@
 /* Visual language of SieFlow Agents: white surfaces, thin borders, teal accent,
-   Quicksand, generous radii. No gradients. Tokens follow the portal theme. */
+   Quicksand, generous radii. No gradients. Tokens follow the portal theme.
+   Brand: the SieFlow Phone symbol, logo and wordmark live in /brand (light and
+   dark versions); never redraw them with icons or text. */
+
+/* Quicksand (OFL, public/fonts/OFL.txt) is served from here: no third parties. */
+@font-face {
+  font-family: 'Quicksand';
+  src: url('/fonts/Quicksand-VariableFont_wght.ttf') format('truetype');
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   --bg: #ffffff;
@@ -505,6 +516,73 @@ select.compact {
 }
 
 /* ---------------------------------------------------------------- brand */
+
+/* Each brand picture comes twice; the theme shows one. */
+.theme-img {
+  display: block;
+}
+
+.theme-img.on-dark {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .theme-img.on-light {
+    display: none;
+  }
+
+  :root:not([data-theme='light']) .theme-img.on-dark {
+    display: block;
+  }
+}
+
+:root[data-theme='dark'] .theme-img.on-light {
+  display: none;
+}
+
+:root[data-theme='dark'] .theme-img.on-dark {
+  display: block;
+}
+
+.brand-symbol {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.symbol-img {
+  width: 34px;
+  height: 34px;
+}
+
+.brand-symbol.large .symbol-img {
+  width: 54px;
+  height: 54px;
+}
+
+.wordmark-img {
+  width: auto;
+  height: 20px;
+  margin-bottom: 3px;
+}
+
+.brand-logo {
+  display: inline-flex;
+}
+
+.logo-img {
+  width: auto;
+  height: 30px;
+}
+
+.brand-stack {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.brand-stack .logo-img {
+  height: 24px;
+}
 
 .logo-mark {
   width: 38px;

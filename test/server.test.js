@@ -124,6 +124,28 @@ describe('demo instance', () => {
     assert.equal((await api.request('/manifest.webmanifest')).status, 200);
   });
 
+  test('the brand and the typeface come from this server, nothing from third parties', async () => {
+    const page = await api.request('/');
+    assert.doesNotMatch(page.headers.get('content-security-policy'), /googleapis|gstatic/);
+    assert.match(page.headers.get('content-security-policy'), /font-src 'self'/);
+    assert.doesNotMatch(page.data, /https?:\/\//, 'the page loads nothing from other hosts');
+    const files = {
+      '/favicon.svg': 'image/svg+xml',
+      '/favicon.ico': 'image/x-icon',
+      '/brand/sieflow-phone-logo.svg': 'image/svg+xml',
+      '/brand/sieflow-phone-wordmark-dark.svg': 'image/svg+xml',
+      '/brand/maskable-icon-512x512.png': 'image/png',
+      '/fonts/Quicksand-VariableFont_wght.ttf': 'font/ttf',
+    };
+    for (const [path, type] of Object.entries(files)) {
+      const res = await fetch(base + path);
+      assert.equal(res.status, 200, path);
+      assert.equal(res.headers.get('content-type'), type, path);
+    }
+    const manifest = (await api.request('/manifest.webmanifest')).data;
+    assert.ok(manifest.icons.some((item) => item.purpose === 'maskable'));
+  });
+
   test('webhook verification handshake', async () => {
     const ok = await api.request('/webhook?hub.mode=subscribe&hub.verify_token=demo-verify-token&hub.challenge=4242');
     assert.equal(ok.status, 200);

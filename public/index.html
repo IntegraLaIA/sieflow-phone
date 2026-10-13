@@ -3,11 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#12826C" />
+    <meta name="theme-color" content="#02143F" />
     <title>SieFlow Phone</title>
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" />
+    <link rel="preload" href="/fonts/Quicksand-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin />
     <link rel="stylesheet" href="/style.css" />
     <script type="module" src="/app.js"></script>
   </head>
@@ -19,7 +21,7 @@
     <!-- Sign in -->
     <main id="login-view" class="login" hidden>
       <form id="login-form" class="login-card">
-        <span class="logo-mark large"><span data-icon="phone" data-size="24"></span></span>
+        <span class="brand-logo"><img class="logo-img theme-img on-light" src="/brand/sieflow-phone-logo.svg" alt="SieFlow Phone" width="256" height="30" /><img class="logo-img theme-img on-dark" src="/brand/sieflow-phone-logo-dark.svg" alt="SieFlow Phone" width="256" height="30" /></span>
         <h1 data-i18n="signInTitle">Sign in</h1>
         <p class="muted" data-i18n="signInSubtitle"></p>
         <label><span data-i18n="username">Username</span><input name="username" autocomplete="username" required /></label>
@@ -43,12 +45,9 @@
     <!-- Setup wizard -->
     <div id="wizard-view" class="wizard" hidden>
       <aside class="wizard-aside">
-        <div class="brand">
-          <span class="logo-mark"><span data-icon="phone" data-size="17"></span></span>
-          <div>
-            <div class="brand-name">SieFlow Phone</div>
-            <div class="brand-sub" data-i18n="wizardTitle"></div>
-          </div>
+        <div class="brand brand-stack">
+          <img class="logo-img theme-img on-light" src="/brand/sieflow-phone-logo.svg" alt="SieFlow Phone" width="205" height="24" /><img class="logo-img theme-img on-dark" src="/brand/sieflow-phone-logo-dark.svg" alt="SieFlow Phone" width="205" height="24" />
+          <div class="brand-sub" data-i18n="wizardTitle"></div>
         </div>
         <p class="wizard-sub" data-i18n="wizardSubtitle"></p>
         <div class="progress"><span id="wizard-progress-bar"></span></div>
@@ -63,9 +62,9 @@
     <div id="app-view" hidden>
       <header class="topbar">
         <div class="brand">
-          <span class="logo-mark"><span data-icon="phone" data-size="17"></span></span>
+          <span class="brand-symbol"><img class="symbol-img theme-img on-light" src="/brand/sieflow-phone-icon.svg" alt="SieFlow Phone" width="34" height="34" /><img class="symbol-img theme-img on-dark" src="/brand/sieflow-phone-icon-dark.svg" alt="SieFlow Phone" width="34" height="34" /></span>
           <div>
-            <div class="brand-name">SieFlow Phone</div>
+            <img class="wordmark-img theme-img on-light" src="/brand/sieflow-phone-wordmark.svg" alt="SieFlow Phone" width="147" height="20" /><img class="wordmark-img theme-img on-dark" src="/brand/sieflow-phone-wordmark-dark.svg" alt="SieFlow Phone" width="147" height="20" />
             <div id="business-number" class="brand-sub"></div>
           </div>
         </div>

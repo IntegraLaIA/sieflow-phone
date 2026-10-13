@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Icono SieFlow Phone para fondo oscuro">
+<title>Icono SieFlow Phone para fondo oscuro</title>
+
+<g>
+  <path fill="#F8FAFF" d="M63 29c-8 2-15 7-20 14l-9 13c-6 9-7 20-3 30 11 31 35 64 65 94 30 30 63 54 94 65 10 4 21 3 30-3l13-9c7-5 12-12 14-20 2-8 0-16-5-22l-26-32c-7-9-20-11-30-5l-19 13c-4 3-10 3-14 0-13-9-27-20-40-33-13-13-24-27-33-40-3-4-3-10 0-14l13-19c6-10 4-23-5-30L86 35c-6-5-15-8-23-6Z"/>
+  <circle cx="35" cy="176" r="9" fill="#5EEAD4"/>
+  <path d="M58 176h27c17 0 27 7 38 21 11 14 24 23 43 23h25" fill="none" stroke="#5EEAD4" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</svg>
