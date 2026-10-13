@@ -16,6 +16,7 @@ import { createGraph, GraphError, NO_CALL_PERMISSION, normalizeNumber } from './
 import { HttpError, readBody, readJson, sendError, sendJson } from './http.js';
 import { iceServersFor } from './ice.js';
 import { createInbox } from './inbox.js';
+import { createUsage } from './usage.js';
 import { log } from './log.js';
 import { Settings, Users } from './settings.js';
 import { createSetup } from './setup.js';
@@ -73,6 +74,7 @@ const UI_FILES = [
   'i18n.js',
   'phone.js',
   'inbox.js',
+  'usage.js',
   'wizard.js',
   'style.css',
   'favicon.svg',
@@ -127,6 +129,7 @@ export async function createApp(config) {
   const assets = loadAssets(config.demo);
   const demo = config.demo ? createDemo(config) : null;
   const inbox = createInbox({ config, db, graph, hub, users });
+  const usage = createUsage({ db });
   const setup = createSetup({
     config,
     settings,
@@ -484,6 +487,7 @@ export async function createApp(config) {
     if (method === 'GET' && pathname === '/api/events') return openEvents(req, res, user.username);
     if (method === 'GET' && pathname === '/api/history') return sendJson(res, 200, { calls: db.recentCalls(100) });
     if (await inbox.handle(req, res, url, user)) return;
+    if (await usage.handle(req, res, url, user)) return;
 
     if (method === 'POST') {
       if (pathname === '/api/calls') return dial(req, res, user.username);

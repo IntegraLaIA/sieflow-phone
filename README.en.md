@@ -18,6 +18,7 @@ Website: [phone.sieflow.ai](https://phone.sieflow.ai/en/) · Made by INTEGRALAIA
 - **Call permission from the chat.** An interactive request inside the 24-hour window, a template with the permission button outside it, and the answer shows up in the thread.
 - **Multi-agent, without the complexity.** Mine / Unassigned / All, the first reply takes the conversation, assign to a teammate, resolve and reopen.
 - **Guided setup.** An empty instance asks for everything in the browser and checks each value live against Meta, down to configuring the webhook for you.
+- **Message log and what Meta charges.** Since October 1, 2026 Meta charges every delivered message, replies inside the 24-hour window included (service messages, 1,000 free a month per number). The composer shows how many the month has used, and administrators see each month's received messages, sent messages by category, what Meta reports as billable, calls and who sent what, with the detail and a CSV download without message text.
 - English and Spanish, light and dark, installable as a desktop app. A demo mode simulates WhatsApp so you can try everything without a Meta account.
 
 ## Try it in one minute
@@ -115,6 +116,7 @@ Nothing is required in the environment: the guided setup stores everything. Any 
 
 - **Your data stays on your server**: settings, operators, conversations and call records live in one SQLite file in the data volume. Call audio never reaches the server.
 - **Retention and erasure**: `RETENTION_DAYS` deletes old messages automatically, and administrators can delete a contact with all its messages and calls.
+- **Message log**: keeps counts per month (UTC months) that stay after the messages are deleted. The detail and the CSV carry numbers, names and statuses, never message text, and only administrators see them.
 - **Hardened by default**: signed webhooks only, one-time setup code, scrypt passwords, sessions that end when a password changes, rate-limited sign-in, strict CSP, HSTS, and a container that runs unprivileged on a read-only filesystem.
 - The only third-party request from the browser is the Quicksand font from Google Fonts.
 

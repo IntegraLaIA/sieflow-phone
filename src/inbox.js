@@ -1,6 +1,8 @@
 // Shared inbox: WhatsApp conversations next to the calls. Operators see the
 // same list, take or assign conversations and resolve them. Messages outside
-// the 24-hour customer service window can only be templates, as WhatsApp rules.
+// the 24-hour customer service window can only be templates, as WhatsApp rules;
+// inside it, free-form replies are service messages, which Meta also charges
+// from October 1, 2026 (see usage.js).
 
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
@@ -14,6 +16,7 @@ const TEMPLATE_CACHE_MS = 5 * 60_000;
 const PENDING_STATUS_MS = 60_000;
 const STATUS_RANK = { sent: 1, delivered: 2, read: 3, failed: 4 };
 const UNSUPPORTED_BUTTONS = new Set(['COPY_CODE', 'OTP', 'FLOW', 'CATALOG', 'MPM', 'SPM']);
+const TEMPLATE_CATEGORIES = new Set(['marketing', 'utility', 'authentication']);
 const DEFAULT_PERMISSION_TEXT = 'We would like to call you on WhatsApp about your request. Is that OK?';
 
 export const windowOpen = (conversation, now = Date.now()) =>
@@ -48,7 +51,9 @@ export function normalizeTemplate(template) {
   return {
     name: template.name,
     language: template.language,
-    category: template.category ?? null,
+    category: TEMPLATE_CATEGORIES.has(String(template.category ?? '').toLowerCase())
+      ? String(template.category).toLowerCase()
+      : null,
     header: headerText,
     body: body?.text ?? '',
     footer: footer?.text ?? null,
@@ -111,11 +116,18 @@ export function createInbox({ config, db, graph, hub, users }) {
 
   const publishMessage = (event, message) => hub.send(event, { conversationId: message.conversationId, message });
 
-  function rememberStatus(wamid, status, error) {
+  // A status (with Meta's pricing) can arrive before the send call returns.
+  function rememberStatus(wamid, status, error, pricing) {
     const now = Date.now();
     for (const [id, entry] of pendingStatuses) if (now - entry.at > PENDING_STATUS_MS) pendingStatuses.delete(id);
     const previous = pendingStatuses.get(wamid);
-    if (!previous || STATUS_RANK[status] >= STATUS_RANK[previous.status]) pendingStatuses.set(wamid, { status, error, at: now });
+    const latest = !previous || STATUS_RANK[status] >= STATUS_RANK[previous.status];
+    pendingStatuses.set(wamid, {
+      status: latest ? status : previous.status,
+      error: latest ? error : previous.error,
+      pricing: pricing ?? previous?.pricing ?? null,
+      at: now,
+    });
   }
 
   function storeOutbound(conversation, message, user) {
@@ -124,7 +136,7 @@ export function createInbox({ config, db, graph, hub, users }) {
     const pending = stored?.wamid && pendingStatuses.get(stored.wamid);
     if (pending) {
       pendingStatuses.delete(stored.wamid);
-      stored = db.updateStatus(stored.wamid, pending.status, pending.error?.message) ?? stored;
+      stored = db.updateStatus(stored.wamid, pending.status, pending.error?.message, pending.pricing) ?? stored;
     }
     publishMessage('message.created', stored);
     publishConversation(conversation.id);
@@ -159,12 +171,12 @@ export function createInbox({ config, db, graph, hub, users }) {
   }
 
   function onStatus(event) {
-    const updated = db.updateStatus(event.wamid, event.status, event.error?.message ?? null);
+    const updated = db.updateStatus(event.wamid, event.status, event.error?.message ?? null, event.pricing);
     if (updated) {
       publishMessage('message.updated', updated);
       if (event.status === 'failed') log.warn('message failed', { code: event.error?.code, error: event.error?.message });
-    } else if (Object.hasOwn(STATUS_RANK, event.status)) {
-      rememberStatus(event.wamid, event.status, event.error);
+    } else if (Object.hasOwn(STATUS_RANK, event.status) && !db.hasMessage(event.wamid)) {
+      rememberStatus(event.wamid, event.status, event.error, event.pricing);
     }
   }
 
@@ -209,6 +221,7 @@ export function createInbox({ config, db, graph, hub, users }) {
       {
         wamid,
         kind: template.callPermission ? 'call_permission_request' : 'template',
+        category: template.category ?? 'template',
         body: text,
         data: { template: template.name, language: template.language },
       },
@@ -294,7 +307,9 @@ export function createInbox({ config, db, graph, hub, users }) {
           throw new CallError(409, 'window_closed', 'More than 24 hours since their last message: send a template');
         }
         const wamid = await graph.sendText(conversation.waId, text);
-        return sendJson(res, 200, { message: storeOutbound(conversation, { wamid, kind: 'text', body: text }, user) });
+        return sendJson(res, 200, {
+          message: storeOutbound(conversation, { wamid, kind: 'text', category: 'service', body: text }, user),
+        });
       }
       case 'template':
         return sendJson(res, 200, { message: await sendTemplate(conversation, body, user) });
@@ -309,7 +324,7 @@ export function createInbox({ config, db, graph, hub, users }) {
         const wamid = await graph.sendPermissionRequest(conversation.waId, text);
         log.info('call permission requested', { agent: user });
         return sendJson(res, 200, {
-          message: storeOutbound(conversation, { wamid, kind: 'call_permission_request', body: text }, user),
+          message: storeOutbound(conversation, { wamid, kind: 'call_permission_request', category: 'service', body: text }, user),
         });
       }
       case 'read': {

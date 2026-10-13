@@ -3,7 +3,7 @@
 
 import { api, errorText, prefs } from './api.js';
 import { t } from './i18n.js';
-import { $, formatDate, formatDuration, formatTime, formatWhen, h, icon, initials, toast } from './ui.js';
+import { $, formatCount, formatDate, formatDuration, formatTime, formatWhen, h, icon, initials, toast } from './ui.js';
 
 let ctx = null; // { me(), dial(number, options), onChange() }
 
@@ -19,6 +19,7 @@ const st = {
   permission: null,
   templates: null,
   templatesEnabled: true,
+  service: null, // this month's service messages: { delivered, free, overFree }
 };
 
 const formatNumber = (digits) => (digits ? `+${digits}` : t('unknownNumber'));
@@ -28,6 +29,12 @@ let reloadTimer = null;
 function scheduleReload() {
   clearTimeout(reloadTimer);
   reloadTimer = setTimeout(load, 250);
+}
+
+let usageTimer = null;
+function scheduleUsage(delay = 1500) {
+  clearTimeout(usageTimer);
+  usageTimer = setTimeout(loadUsage, delay);
 }
 
 let readTimer = null;
@@ -110,6 +117,26 @@ async function loadPermission() {
     if (st.current?.id === conversation.id) st.permission = { status: 'unknown' };
   }
   renderHeader();
+}
+
+// Every reply inside the window is a service message Meta charges past the
+// month's free ones, so the composer shows where the month stands.
+async function loadUsage() {
+  try {
+    st.service = (await api('/api/usage/current')).service;
+  } catch {
+    return; // just a hint
+  }
+  const hint = $('#service-hint');
+  if (hint) hint.textContent = serviceHint();
+}
+
+function serviceHint() {
+  if (!st.service) return '';
+  const free = formatCount(st.service.free);
+  return st.service.overFree > 0
+    ? t('serviceHintOver', { free })
+    : t('serviceHint', { used: formatCount(st.service.delivered), free });
 }
 
 async function loadTemplates(refresh = false) {
@@ -218,6 +245,7 @@ function templateCard(template, selected, onSelect) {
         { class: 'choice-title' },
         h('strong', { text: template.name }),
         h('span', { class: 'chip', text: template.language }),
+        template.category && h('span', { class: 'chip', text: t(`categories.${template.category}`) }),
         template.callPermission && h('span', { class: 'chip accent' }, icon('phone', 12), t('kinds.call_permission_request')),
       ),
       h('span', { class: 'choice-text', text: template.supported ? template.body : t('templateUnsupported') }),
@@ -616,6 +644,7 @@ function renderComposer() {
       textarea,
       h('button', { class: 'send-btn', type: 'button', title: t('send'), onclick: () => sendText(textarea) }, icon('send', 16)),
     ),
+    h('p', { id: 'service-hint', class: `composer-hint ${st.service?.overFree ? 'over' : ''}`, text: serviceHint() }),
   );
 }
 
@@ -661,6 +690,7 @@ export function onEvent(name, data) {
       }
       break;
     case 'message.updated':
+      if (data.message.direction === 'out' && ['delivered', 'read'].includes(data.message.status)) scheduleUsage();
       if (st.current?.id === data.conversationId) {
         st.messages = st.messages.map((message) => (message.id === data.message.id ? data.message : message));
         const existing = $(`#thread-body [data-id="${data.message.id}"]`);
@@ -717,6 +747,7 @@ export function init(context) {
   // Refresh the "time left" of the chat window now and then.
   setInterval(() => st.current && renderHeader(), 60_000);
   load();
+  loadUsage();
 }
 
 export function refreshLabels() {

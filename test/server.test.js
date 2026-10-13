@@ -377,6 +377,64 @@ describe('demo instance', () => {
     assert.equal((await api.request(`/api/conversations/${id}`, { user: 'ana' })).status, 404);
   });
 
+  test('message log: the service counter for everyone; month, detail and CSV for administrators', async () => {
+    const luis = await events('luis');
+    const number = '573005550123';
+    await sim('message', { from: number, name: '=Pepa', text: 'Quiero el registro' });
+    const created = await luis.next('message.created', (event) => event.message.body === 'Quiero el registro');
+    const before = (await api.request('/api/usage/current', { user: 'beto' })).data;
+    assert.equal(before.service.free, 1000);
+
+    const reply = await api.request(`/api/conversations/${created.conversationId}/messages`, {
+      method: 'POST',
+      user: 'luis',
+      body: { text: 'Con gusto' },
+    });
+    assert.equal(reply.data.message.category, 'service');
+    const delivered = await luis.next(
+      'message.updated',
+      (event) => event.message.id === reply.data.message.id && event.message.status === 'delivered',
+    );
+    assert.equal(delivered.message.billable, false);
+    assert.equal(delivered.message.pricingCategory, 'service');
+    assert.equal(delivered.message.pricingType, 'free_customer_service');
+    const after = (await api.request('/api/usage/current', { user: 'beto' })).data;
+    assert.equal(after.service.delivered, before.service.delivered + 1);
+
+    assert.equal((await api.request('/api/usage', { user: 'beto' })).status, 403);
+    assert.equal((await api.request('/api/usage/messages', { user: 'beto' })).status, 403);
+    assert.equal((await api.request('/api/usage/export', { user: 'beto' })).status, 403);
+
+    const summary = await api.request('/api/usage?months=2', { user: 'ana' });
+    assert.equal(summary.data.freeServiceMessages, 1000);
+    assert.equal(summary.data.months.length, 2);
+    const month = summary.data.months[0];
+    assert.equal(month.month, new Date().toISOString().slice(0, 7));
+    assert.ok(month.received >= 1);
+    assert.ok(month.delivered.service >= 1);
+    assert.ok(month.agents.some((agent) => agent.agent === 'luis' && agent.messages >= 1));
+
+    const log = await api.request(`/api/usage/messages?month=${month.month}&filter=sent&agent=luis`, { user: 'ana' });
+    const entry = log.data.messages.find((item) => item.id === reply.data.message.id);
+    assert.equal(entry.waId, number);
+    assert.equal(entry.status, 'delivered');
+    assert.equal(entry.body, undefined);
+    assert.equal((await api.request('/api/usage/messages?month=2026-13', { user: 'ana' })).status, 400);
+
+    const csv = await api.request(`/api/usage/export?month=${month.month}&lang=es`, { user: 'ana' });
+    assert.equal(csv.status, 200);
+    assert.match(csv.headers.get('content-type'), /^text\/csv/);
+    assert.match(csv.headers.get('content-disposition'), /filename="sieflow-phone-\d{4}-\d{2}\.csv"/);
+    const lines = csv.data.replace(/^﻿/, '').trim().split('\r\n');
+    assert.equal(
+      lines[0],
+      'fecha_utc,sentido,numero,nombre,tipo,categoria,plantilla,estado,facturable_meta,categoria_meta,tipo_meta,operador,segundos_llamada',
+    );
+    assert.ok(lines.some((line) => line.includes(`,enviado,${number},'=Pepa,text,service,,delivered,no,service,`)));
+    assert.ok(!csv.data.includes('Con gusto') && !csv.data.includes('Quiero el registro'), 'no message text in the export');
+    luis.close();
+  });
+
   test('non-object JSON bodies are a 400, not a crash', async () => {
     for (const body of ['null', '42', '"text"', '[1]']) {
       const res = await fetch(`${base}/api/login`, { method: 'POST', headers: { 'content-type': 'application/json' }, body });

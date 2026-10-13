@@ -25,6 +25,19 @@ function firstError(errors) {
 
 const toNumber = (value) => (value === undefined || value === null || value === '' ? null : Number(value));
 
+// What Meta says it charges for a message, as sent in its status webhooks:
+// { billable, pricing_model: "PMP", category: "service" | "utility" | ..., type: "regular" | ... }.
+function parsePricing(pricing) {
+  if (!pricing || typeof pricing !== 'object') return null;
+  const text = (value) => (value === undefined || value === null || value === '' ? null : String(value).toLowerCase().slice(0, 40));
+  return {
+    billable: typeof pricing.billable === 'boolean' ? pricing.billable : null,
+    category: text(pricing.category),
+    type: text(pricing.type),
+    model: text(pricing.pricing_model),
+  };
+}
+
 const MEDIA_KINDS = new Set(['image', 'video', 'audio', 'document', 'sticker']);
 
 // One incoming WhatsApp message -> { kind, body, media?, data?, reaction? }
@@ -93,7 +106,7 @@ function parseMessage(message) {
 //   call.status       { callId, status }                    RINGING | ACCEPTED | REJECTED
 //   call.terminate    { callId, direction, peer, status, duration, error }
 //   message.received  { wamid, from, name, timestamp, replyTo, kind, body, media?, data?, reaction? }
-//   message.status    { wamid, status, error }               sent | delivered | read | failed
+//   message.status    { wamid, status, error, pricing }      sent | delivered | read | failed
 export function parseWebhook(payload, phoneNumberId) {
   const events = [];
   if (!payload || payload.object !== 'whatsapp_business_account') return events;
@@ -151,7 +164,13 @@ export function parseWebhook(payload, phoneNumberId) {
         }
         for (const status of value.statuses ?? []) {
           if (!status.id || !status.status) continue;
-          events.push({ type: 'message.status', wamid: status.id, status: status.status, error: firstError(status.errors) });
+          events.push({
+            type: 'message.status',
+            wamid: status.id,
+            status: status.status,
+            error: firstError(status.errors),
+            pricing: parsePricing(status.pricing),
+          });
         }
       }
     }
